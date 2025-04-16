@@ -17,12 +17,12 @@ main.BorderSizePixel = 0
 main.ClipsDescendants = true
 main.Parent = gui
 
--- MINIMIZE ICON (WITH SAMPLE IMAGE)
+-- MINIMIZE ICON (YOUR CUSTOM IMAGE)
 local minimizeIcon = Instance.new("ImageButton")
 minimizeIcon.Name = "RinIcon"
 minimizeIcon.Size = UDim2.new(0, 60, 0, 60)
 minimizeIcon.Position = UDim2.new(0, 20, 1, -80)
-minimizeIcon.Image = "rbxassetid://6956135794"  -- Sample valid image ID
+minimizeIcon.Image = "rbxassetid://71938939139112"
 minimizeIcon.ImageColor3 = Color3.new(1,1,1)
 minimizeIcon.ImageTransparency = 0
 minimizeIcon.BackgroundColor3 = Color3.new(0,0,0)
@@ -37,7 +37,7 @@ local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(1, 0)
 corner.Parent = minimizeIcon
 
--- BORDER
+-- WHITE BORDER
 local stroke = Instance.new("UIStroke")
 stroke.Color = Color3.new(1,1,1)
 stroke.Thickness = 2
@@ -72,7 +72,7 @@ closeBtn.TextSize = 24
 closeBtn.BackgroundTransparency = 1
 closeBtn.Parent = header
 
--- TOGGLE SWITCH FUNCTION
+-- TOGGLE SYSTEM
 local function CreateToggle(text, yPosition)
     local container = Instance.new("Frame")
     container.Size = UDim2.new(1, -20, 0, 30)
@@ -139,7 +139,7 @@ fruitBtn.AutoButtonColor = false
 fruitBtn.Parent = main
 Instance.new("UICorner", fruitBtn).CornerRadius = UDim.new(0, 6)
 
--- BUTTON HOVER EFFECTS
+-- BUTTON EFFECTS
 fruitBtn.MouseEnter:Connect(function()
     TS:Create(fruitBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 200, 120)}):Play()
 end)
@@ -180,7 +180,7 @@ end
 InitDrag(main)
 InitDrag(minimizeIcon)
 
--- MINIMIZE/RESTORE FUNCTION
+-- MINIMIZE/RESTORE SYSTEM
 local function ToggleGUI()
     if main.Visible then
         TS:Create(main, TweenInfo.new(0.3), {
