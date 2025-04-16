@@ -117,16 +117,28 @@ coroutine.wrap(function()
     header.BackgroundTransparency = 0.7
     header.Parent = main
 
+    -- Version 5 Title
     local title = Instance.new("TextLabel")
     title.Size = UDim2.new(1, -40, 1, 0)
     title.Position = UDim2.new(0, 10, 0, 0)
-    title.Text = "RIN HUB PREMIUM"
+    title.Text = "RIN HUB v5"  -- UPDATED VERSION TEXT
     title.Font = Enum.Font.GothamBold
     title.TextColor3 = Color3.fromRGB(0, 255, 154)
     title.TextSize = 16
     title.BackgroundTransparency = 1
     title.TextXAlignment = Enum.TextXAlignment.Left
     title.Parent = header
+
+    -- Version Badge
+    local versionBadge = Instance.new("TextLabel")
+    versionBadge.Size = UDim2.new(0, 40, 0, 20)
+    versionBadge.Position = UDim2.new(1, -45, 0, 5)
+    versionBadge.Text = "v5.0"
+    versionBadge.Font = Enum.Font.GothamMedium
+    versionBadge.TextColor3 = Color3.fromRGB(150, 150, 150)
+    versionBadge.TextSize = 12
+    versionBadge.BackgroundTransparency = 1
+    versionBadge.Parent = header
 
     -- Close Button
     local closeBtn = Instance.new("TextButton")
