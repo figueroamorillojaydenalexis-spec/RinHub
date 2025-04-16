@@ -1,153 +1,243 @@
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local TS = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
+-- Loading Screen
+local loadingGui = Instance.new("ScreenGui")
+loadingGui.Name = "LoadingScreen"
+loadingGui.ResetOnSpawn = false
+loadingGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+loadingGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+
+local loadingFrame = Instance.new("Frame")
+loadingFrame.Size = UDim2.new(1, 0, 1, 0)
+loadingFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+loadingFrame.BorderSizePixel = 0
+loadingFrame.Parent = loadingGui
+
+local loadingContent = Instance.new("Frame")
+loadingContent.Size = UDim2.new(0, 300, 0, 150)
+loadingContent.Position = UDim2.new(0.5, -150, 0.5, -75)
+loadingContent.BackgroundTransparency = 1
+loadingContent.Parent = loadingFrame
+
+local loadingSpinner = Instance.new("ImageLabel")
+loadingSpinner.Size = UDim2.new(0, 80, 0, 80)
+loadingSpinner.Position = UDim2.new(0.5, -40, 0, 20)
+loadingSpinner.Image = "rbxassetid://6751070948" -- Replace with custom spinner ID
+loadingSpinner.BackgroundTransparency = 1
+loadingSpinner.Parent = loadingContent
+
+local loadingText = Instance.new("TextLabel")
+loadingText.Size = UDim2.new(1, 0, 0, 30)
+loadingText.Position = UDim2.new(0, 0, 0, 110)
+loadingText.Text = "Loading Rin Hub Script..."
+loadingText.Font = Enum.Font.GothamBold
+loadingText.TextColor3 = Color3.fromRGB(0, 255, 150)
+loadingText.TextSize = 18
+loadingText.BackgroundTransparency = 1
+loadingText.Parent = loadingContent
+
+-- Animate spinner
+local spinConnection
+spinConnection = RunService.RenderStepped:Connect(function(dt)
+    loadingSpinner.Rotation = loadingSpinner.Rotation + (dt * 180)
+end)
+
+-- Simulate loading
+coroutine.wrap(function()
+    wait(2) -- Replace with actual loading time
+    TS:Create(loadingFrame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+    wait(0.5)
+    loadingGui:Destroy()
+    spinConnection:Disconnect()
+end)()
+
+-- Main GUI (Enhanced)
 local gui = Instance.new("ScreenGui")
 gui.ResetOnSpawn = false
-gui.Name = "CoolUI"
+gui.Name = "RinHubUI"
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 200, 0, 200)
-main.Position = UDim2.new(0.5, -100, 0.5, -100)
-main.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+main.Size = UDim2.new(0, 220, 0, 250)
+main.Position = UDim2.new(0.5, -110, 0.5, -125)
+main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 main.BorderSizePixel = 0
+main.ClipsDescendants = true
 main.Parent = gui
-Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
+
+-- Modern Glass Effect
+local blur = Instance.new("BlurEffect")
+blur.Size = 10
+blur.Parent = main
+
+local gradient = Instance.new("UIGradient")
+gradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 154)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 92, 184))
+})
+gradient.Rotation = 90
+gradient.Transparency = NumberSequence.new(0.7)
+gradient.Parent = main
 
 local stroke = Instance.new("UIStroke")
-stroke.Color = Color3.fromRGB(0, 255, 100)
+stroke.Color = Color3.fromRGB(0, 255, 154)
 stroke.Thickness = 2
-stroke.Transparency = 0.3
+stroke.Transparency = 0.1
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 stroke.Parent = main
 
-local bg = Instance.new("UIGradient")
-bg.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 150)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 180, 80))
-})
-bg.Parent = main
+local glow = Instance.new("ImageLabel")
+glow.Size = UDim2.new(1, 40, 1, 40)
+glow.Position = UDim2.new(0, -20, 0, -20)
+glow.Image = "rbxassetid://5028857084" -- Glow effect image
+glow.ImageColor3 = Color3.fromRGB(0, 255, 154)
+glow.ScaleType = Enum.ScaleType.Slice
+glow.SliceCenter = Rect.new(20, 20, 280, 280)
+glow.BackgroundTransparency = 1
+glow.Parent = main
 
-local shadow = Instance.new("ImageLabel")
-shadow.Size = UDim2.new(1, 30, 1, 30)
-shadow.Position = UDim2.new(0, -15, 0, -15)
-shadow.BackgroundTransparency = 1
-shadow.Image = "rbxassetid://297774371"
-shadow.ImageColor3 = Color3.fromRGB(0, 255, 100)
-shadow.ImageTransparency = 0.6
-shadow.Parent = main
+-- Header Section
+local header = Instance.new("Frame")
+header.Size = UDim2.new(1, 0, 0, 40)
+header.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+header.BackgroundTransparency = 0.7
+header.Parent = main
 
-local label = Instance.new("TextLabel")
-label.Size = UDim2.new(1, 0, 0, 30)
-label.BackgroundTransparency = 1
-label.Text = "Rin Hub"
-label.TextColor3 = Color3.fromRGB(255, 255, 255)
-label.TextStrokeTransparency = 0.7
-label.TextSize = 16
-label.Font = Enum.Font.GothamBold
-label.Parent = main
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -40, 1, 0)
+title.Position = UDim2.new(0, 10, 0, 0)
+title.Text = "RIN HUB v2.0"
+title.Font = Enum.Font.GothamBold
+title.TextColor3 = Color3.fromRGB(0, 255, 154)
+title.TextSize = 16
+title.BackgroundTransparency = 1
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = header
 
-local function makeToggle(text, yPos)
-    local base = Instance.new("Frame")
-    base.Size = UDim2.new(0.9, 0, 0, 30)
-    base.Position = UDim2.new(0.5, 0, 0, yPos)
-    base.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
-    base.BorderSizePixel = 0
-    base.AnchorPoint = Vector2.new(0.5, 0)
-    base.Parent = main
-    Instance.new("UICorner", base).CornerRadius = UDim.new(0, 6)
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -35, 0.5, -15)
+closeBtn.Text = "×"
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
+closeBtn.TextSize = 24
+closeBtn.BackgroundTransparency = 1
+closeBtn.Parent = header
 
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 40, 0, 20)
-    btn.Position = UDim2.new(1, -45, 0.5, -10)
-    btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- black when OFF
-    btn.BorderSizePixel = 0
-    btn.Text = ""
-    btn.Parent = base
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(1, 0)
+-- Modern Toggle Function
+local function createModernToggle(text, yPos)
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(1, -20, 0, 30)
+    container.Position = UDim2.new(0, 10, 0, yPos)
+    container.BackgroundTransparency = 1
+    container.Parent = main
 
-    local dot = Instance.new("Frame")
-    dot.Size = UDim2.new(0, 16, 0, 16)
-    dot.Position = UDim2.new(0, 2, 0.5, -8)
-    dot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    dot.BorderSizePixel = 0
-    dot.Parent = btn
-    Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0.7, 0, 1, 0)
+    label.Text = text
+    label.Font = Enum.Font.Gotham
+    label.TextColor3 = Color3.fromRGB(200, 200, 200)
+    label.TextSize = 14
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.BackgroundTransparency = 1
+    label.Parent = container
 
-    local txt = Instance.new("TextLabel")
-    txt.Size = UDim2.new(1, -55, 1, 0)
-    txt.Position = UDim2.new(0, 10, 0, 0)
-    txt.BackgroundTransparency = 1
-    txt.Text = text
-    txt.TextColor3 = Color3.fromRGB(255, 255, 255)
-    txt.TextSize = 14
-    txt.Font = Enum.Font.Gotham
-    txt.TextXAlignment = Enum.TextXAlignment.Left
-    txt.Parent = base
+    local toggleFrame = Instance.new("Frame")
+    toggleFrame.Size = UDim2.new(0, 50, 0, 25)
+    toggleFrame.Position = UDim2.new(1, -50, 0.5, -12.5)
+    toggleFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    toggleFrame.Parent = container
+    Instance.new("UICorner", toggleFrame).CornerRadius = UDim.new(1, 0)
 
-    local on = false
-    btn.MouseButton1Click:Connect(function()
-        on = not on
-        local goals = {
-            [btn] = {BackgroundColor3 = on and Color3.fromRGB(0, 255, 127) or Color3.fromRGB(0, 0, 0)},
-            [dot] = {Position = on and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)}
-        }
-        for obj, goal in pairs(goals) do
-            TS:Create(obj, TweenInfo.new(0.2), goal):Play()
+    local toggleDot = Instance.new("Frame")
+    toggleDot.Size = UDim2.new(0, 21, 0, 21)
+    toggleDot.Position = UDim2.new(0, 2, 0.5, -10.5)
+    toggleDot.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
+    toggleDot.Parent = toggleFrame
+    Instance.new("UICorner", toggleDot).CornerRadius = UDim.new(1, 0)
+
+    local isToggled = false
+    local function updateToggle()
+        local newPos = isToggled and UDim2.new(1, -23, 0.5, -10.5) or UDim2.new(0, 2, 0.5, -10.5)
+        TS:Create(toggleDot, TweenInfo.new(0.2), {Position = newPos}):Play()
+        TS:Create(toggleFrame, TweenInfo.new(0.2), {BackgroundColor3 = isToggled and Color3.fromRGB(0, 255, 154) or Color3.fromRGB(40, 40, 40)}):Play()
+    end
+
+    toggleFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isToggled = not isToggled
+            updateToggle()
         end
     end)
+
+    return {Container = container, Toggle = toggleFrame, SetState = function(state) isToggled = state updateToggle() end}
 end
 
--- Add toggle buttons
-makeToggle("Freeze Trade", 40)
-makeToggle("Auto Accept", 80)
-makeToggle("Auto Add Items", 120)
+-- Create Toggles
+local toggles = {
+    createModernToggle("Freeze Trade", 50),
+    createModernToggle("Auto Accept", 90),
+    createModernToggle("Auto Add Items", 130)
+}
 
--- Add "Add Best Fruit" button
+-- Add Best Fruit Button
 local fruitBtn = Instance.new("TextButton")
-fruitBtn.Size = UDim2.new(0.9, 0, 0, 30)
-fruitBtn.Position = UDim2.new(0.5, 0, 0, 160)
-fruitBtn.AnchorPoint = Vector2.new(0.5, 0)
-fruitBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-fruitBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
-fruitBtn.Text = "Add Best Fruit"
+fruitBtn.Size = UDim2.new(1, -20, 0, 35)
+fruitBtn.Position = UDim2.new(0, 10, 0, 170)
+fruitBtn.Text = "ADD BEST FRUIT"
 fruitBtn.Font = Enum.Font.GothamBold
+fruitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 fruitBtn.TextSize = 14
+fruitBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 154)
+fruitBtn.AutoButtonColor = false
 fruitBtn.Parent = main
 Instance.new("UICorner", fruitBtn).CornerRadius = UDim.new(0, 6)
 
--- Optional functionality:
-fruitBtn.MouseButton1Click:Connect(function()
-    print("Best fruit added!")
-    -- Add your custom logic here
+-- Button Hover Effects
+fruitBtn.MouseEnter:Connect(function()
+    TS:Create(fruitBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 200, 120)}):Play()
 end)
 
--- Drag logic
-local drag = { enabled = false, start = nil, startPos = nil }
+fruitBtn.MouseLeave:Connect(function()
+    TS:Create(fruitBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 255, 154)}):Play()
+end)
+
+-- Close Button Functionality
+closeBtn.MouseButton1Click:Connect(function()
+    TS:Create(main, TweenInfo.new(0.3), {Size = UDim2.new(0, 0, 0, 0)}):Play()
+    wait(0.3)
+    gui:Destroy()
+end)
+
+-- Enhanced Drag Functionality
+local drag = {Enabled = false, Start = nil, StartPosition = nil}
 
 main.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        drag.enabled = true
-        drag.start = input.Position
-        drag.startPos = main.Position
-
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        drag.Enabled = true
+        drag.Start = input.Position
+        drag.StartPosition = main.Position
+        
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
-                drag.enabled = false
+                drag.Enabled = false
             end
         end)
     end
 end)
 
 UIS.InputChanged:Connect(function(input)
-    if drag.enabled and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        local delta = input.Position - drag.start
+    if drag.Enabled and input.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = input.Position - drag.Start
         main.Position = UDim2.new(
-            drag.startPos.X.Scale,
-            drag.startPos.X.Offset + delta.X,
-            drag.startPos.Y.Scale,
-            drag.startPos.Y.Offset + delta.Y
+            drag.StartPosition.X.Scale,
+            drag.StartPosition.X.Offset + delta.X,
+            drag.StartPosition.Y.Scale,
+            drag.StartPosition.Y.Offset + delta.Y
         )
     end
 end)
