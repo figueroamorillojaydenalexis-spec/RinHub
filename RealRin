@@ -2,8 +2,8 @@ local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local TS = game:GetService("TweenService")
 
--- Asset ID para kay Rin (palitan ng sariling image ID)
-local RIN_IMAGE = "rbxassetid://1234567890" -- Palitan ng tunay na ID
+-- Gamitin ang asset ID na ibinigay mo
+local RIN_IMAGE = "rbxassetid://97994335210203"  -- Naka-update na asset ID
 
 local gui = Instance.new("ScreenGui")
 gui.ResetOnSpawn = false
@@ -25,73 +25,89 @@ local confirmFrame = Instance.new("Frame")
 confirmFrame.Size = UDim2.new(1, 0, 1, 0)
 confirmFrame.BackgroundTransparency = 1
 confirmFrame.Visible = false
+confirmFrame.ZIndex = 2
 confirmFrame.Parent = gui
 
 local overlay = Instance.new("Frame")
 overlay.Size = UDim2.new(1, 0, 1, 0)
 overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-overlay.BackgroundTransparency = 0.5
+overlay.BackgroundTransparency = 1
+overlay.ZIndex = 2
 overlay.Parent = confirmFrame
 
 local dialog = Instance.new("Frame")
-dialog.Size = UDim2.new(0, 200, 0, 230)
-dialog.Position = UDim2.new(0.5, -100, 0.5, -115)
+dialog.Size = UDim2.new(0, 300, 0, 350)  -- Mas malaking laki para sa image
+dialog.Position = UDim2.new(0.5, -150, 1.5, -175)
 dialog.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+dialog.ZIndex = 3
 dialog.Parent = confirmFrame
 Instance.new("UICorner", dialog)
 
 local rinImage = Instance.new("ImageLabel")
-rinImage.Size = UDim2.new(0, 150, 0, 150)
-rinImage.Position = UDim2.new(0.5, -75, 0, 10)
+rinImage.Size = UDim2.new(0, 250, 0, 250)  -- Mas malaking image area
+rinImage.Position = UDim2.new(0.5, -125, 0, 10)
 rinImage.Image = RIN_IMAGE
+rinImage.BackgroundTransparency = 1
+rinImage.ScaleType = Enum.ScaleType.Fit  -- Para mag-fit ang image
+rinImage.ZIndex = 4
 rinImage.Parent = dialog
 
+-- Confirmation Text
 local confirmText = Instance.new("TextLabel")
 confirmText.Size = UDim2.new(1, -20, 0, 40)
-confirmText.Position = UDim2.new(0, 10, 0, 170)
-confirmText.Text = "Sure ka ba na gusto mong umexit?"
+confirmText.Position = UDim2.new(0, 10, 0, 270)
+confirmText.Text = "Gusto mo talagang umalis?"
 confirmText.Font = Enum.Font.GothamBold
 confirmText.TextColor3 = Color3.fromRGB(255, 255, 255)
-confirmText.TextSize = 14
+confirmText.TextSize = 16
 confirmText.BackgroundTransparency = 1
+confirmText.ZIndex = 4
 confirmText.Parent = dialog
 
+-- Yes/No Buttons
 local buttonFrame = Instance.new("Frame")
-buttonFrame.Size = UDim2.new(1, 0, 0, 30)
-buttonFrame.Position = UDim2.new(0, 0, 1, -40)
+buttonFrame.Size = UDim2.new(1, -40, 0, 40)
+buttonFrame.Position = UDim2.new(0, 20, 1, -50)
 buttonFrame.BackgroundTransparency = 1
+buttonFrame.ZIndex = 4
 buttonFrame.Parent = dialog
 
 local yesBtn = Instance.new("TextButton")
 yesBtn.Size = UDim2.new(0.4, 0, 1, 0)
-yesBtn.Text = "Oo"
-yesBtn.Font = Enum.Font.GothamBold
-yesBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
-yesBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+yesBtn.Text = "OO"
+yesBtn.Font = Enum.Font.GothamBlack
+yesBtn.TextColor3 = Color3.fromRGB(255, 60, 60)
+yesBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+yesBtn.ZIndex = 5
 yesBtn.Parent = buttonFrame
 Instance.new("UICorner", yesBtn)
 
 local noBtn = Instance.new("TextButton")
 noBtn.Size = UDim2.new(0.4, 0, 1, 0)
 noBtn.Position = UDim2.new(1, -80, 0, 0)
-noBtn.Text = "Hindi"
-noBtn.Font = Enum.Font.GothamBold
+noBtn.Text = "HINDI"
+noBtn.Font = Enum.Font.GothamBlack
 noBtn.TextColor3 = Color3.fromRGB(0, 255, 154)
-noBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+noBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+noBtn.ZIndex = 5
 noBtn.Parent = buttonFrame
 Instance.new("UICorner", noBtn)
 
--- Close Button Functionality
+-- Function para sa exit confirmation
 local function showExitConfirm()
     confirmFrame.Visible = true
-    TS:Create(confirmFrame, TweenInfo.new(0.3), {BackgroundTransparency = 0.5}):Play()
-    TS:Create(dialog, TweenInfo.new(0.3), {Position = UDim2.new(0.5, -100, 0.5, -115)}):Play()
+    TS:Create(overlay, TweenInfo.new(0.3), {BackgroundTransparency = 0.5}):Play()
+    TS:Create(dialog, TweenInfo.new(0.5, Enum.EasingStyle.Back), {
+        Position = UDim2.new(0.5, -150, 0.5, -175)
+    }):Play()
 end
 
 local function hideExitConfirm()
-    TS:Create(confirmFrame, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
-    TS:Create(dialog, TweenInfo.new(0.3), {Position = UDim2.new(0.5, -100, 0.4, -115)}):Play()
-    wait(0.3)
+    TS:Create(overlay, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+    TS:Create(dialog, TweenInfo.new(0.5, Enum.EasingStyle.Back), {
+        Position = UDim2.new(0.5, -150, 1.5, -175)
+    }):Play()
+    wait(0.5)
     confirmFrame.Visible = false
 end
 
@@ -104,5 +120,33 @@ end)
 
 noBtn.MouseButton1Click:Connect(hideExitConfirm)
 
--- Original Close Button (I-update ang existing code)
+-- Main GUI Elements
+local header = Instance.new("Frame")
+header.Size = UDim2.new(1, 0, 0, 40)
+header.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+header.BackgroundTransparency = 0.7
+header.Parent = main
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -40, 1, 0)
+title.Position = UDim2.new(0, 10, 0, 0)
+title.Text = "RIN HUB v5"
+title.Font = Enum.Font.GothamBold
+title.TextColor3 = Color3.fromRGB(0, 255, 154)
+title.TextSize = 16
+title.BackgroundTransparency = 1
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = header
+
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -35, 0.5, -15)
+closeBtn.Text = "×"
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
+closeBtn.TextSize = 24
+closeBtn.BackgroundTransparency = 1
+closeBtn.Parent = header
 closeBtn.MouseButton1Click:Connect(showExitConfirm)
+
+-- [IDAGDAG DITO ANG MGA TOGGLE BUTTONS AT IBA PANG ELEMENTS]
