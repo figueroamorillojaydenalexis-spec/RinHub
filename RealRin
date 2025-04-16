@@ -2,53 +2,65 @@ local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local TS = game:GetService("TweenService")
 
-local gui = Instance.new("ScreenGui")
-gui.ResetOnSpawn = false
-gui.Name = "RinHubPremium"
-gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+-- LOADING SCREEN
+local loadingGui = Instance.new("ScreenGui")
+loadingGui.Name = "LoadingScreen"
+loadingGui.ResetOnSpawn = false
+loadingGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+
+local loadingFrame = Instance.new("Frame")
+loadingFrame.Size = UDim2.new(1, 0, 1, 0)
+loadingFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+loadingFrame.Parent = loadingGui
+
+local loadingText = Instance.new("TextLabel")
+loadingText.Size = UDim2.new(1, 0, 0, 40)
+loadingText.Position = UDim2.new(0.5, 0, 0.5, 0)
+loadingText.AnchorPoint = Vector2.new(0.5, 0.5)
+loadingText.Text = "Loading Rin Hub Script..."
+loadingText.Font = Enum.Font.GothamBold
+loadingText.TextColor3 = Color3.fromRGB(0, 255, 150)
+loadingText.TextSize = 24
+loadingText.BackgroundTransparency = 1
+loadingText.Parent = loadingFrame
+
+-- MAIN GUI
+local mainGui = Instance.new("ScreenGui")
+mainGui.ResetOnSpawn = false
+mainGui.Enabled = false
+mainGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 
 -- MAIN WINDOW
-local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 220, 0, 250)
-main.Position = UDim2.new(0.5, -110, 0.5, -125)
-main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-main.BackgroundTransparency = 0.3
-main.BorderSizePixel = 0
-main.ClipsDescendants = true
-main.Parent = gui
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 220, 0, 250)
+mainFrame.Position = UDim2.new(0.5, -110, 0.5, -125)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+mainFrame.BackgroundTransparency = 0.3
+mainFrame.BorderSizePixel = 0
+mainFrame.ClipsDescendants = true
+mainFrame.Parent = mainGui
 
--- MINIMIZE ICON (YOUR CUSTOM IMAGE)
-local minimizeIcon = Instance.new("ImageButton")
-minimizeIcon.Name = "RinIcon"
-minimizeIcon.Size = UDim2.new(0, 60, 0, 60)
-minimizeIcon.Position = UDim2.new(0, 20, 1, -80)
-minimizeIcon.Image = "rbxassetid://71938939139112"
-minimizeIcon.ImageColor3 = Color3.new(1,1,1)
-minimizeIcon.ImageTransparency = 0
-minimizeIcon.BackgroundColor3 = Color3.new(0,0,0)
-minimizeIcon.BackgroundTransparency = 0.5
-minimizeIcon.ScaleType = Enum.ScaleType.Crop
-minimizeIcon.Visible = false
-minimizeIcon.ZIndex = 10
-minimizeIcon.Parent = gui
+-- RIN MINIMIZE ICON
+local rinIcon = Instance.new("ImageButton")
+rinIcon.Name = "RinIcon"
+rinIcon.Size = UDim2.new(0, 60, 0, 60)
+rinIcon.Image = "rbxassetid://71938939139112"
+rinIcon.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+rinIcon.BackgroundTransparency = 0.5
+rinIcon.ScaleType = Enum.ScaleType.Crop
+rinIcon.Visible = false
+rinIcon.ZIndex = 999
+rinIcon.Parent = mainGui
 
 -- CIRCLE EFFECT
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(1, 0)
-corner.Parent = minimizeIcon
-
--- WHITE BORDER
-local stroke = Instance.new("UIStroke")
-stroke.Color = Color3.new(1,1,1)
-stroke.Thickness = 2
-stroke.Parent = minimizeIcon
+Instance.new("UICorner", rinIcon).CornerRadius = UDim.new(1, 0)
 
 -- HEADER
 local header = Instance.new("Frame")
 header.Size = UDim2.new(1, 0, 0, 40)
 header.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 header.BackgroundTransparency = 0.7
-header.Parent = main
+header.Parent = mainFrame
 
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -40, 1, 0)
@@ -78,7 +90,7 @@ local function CreateToggle(text, yPosition)
     container.Size = UDim2.new(1, -20, 0, 30)
     container.Position = UDim2.new(0, 10, 0, yPosition)
     container.BackgroundTransparency = 1
-    container.Parent = main
+    container.Parent = mainFrame
 
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(0.7, 0, 1, 0)
@@ -121,7 +133,7 @@ local function CreateToggle(text, yPosition)
     return container
 end
 
--- ADD TOGGLES
+-- ADD FEATURES
 CreateToggle("Freeze Trade", 50)
 CreateToggle("Auto Accept", 90)
 CreateToggle("Auto Add Items", 130)
@@ -136,7 +148,7 @@ fruitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 fruitBtn.TextSize = 14
 fruitBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 154)
 fruitBtn.AutoButtonColor = false
-fruitBtn.Parent = main
+fruitBtn.Parent = mainFrame
 Instance.new("UICorner", fruitBtn).CornerRadius = UDim.new(0, 6)
 
 -- BUTTON EFFECTS
@@ -149,8 +161,7 @@ end)
 
 -- DRAG SYSTEM
 local function InitDrag(target)
-    local dragStartPos
-    local dragStart
+    local dragStartPos, dragStart
     
     target.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -177,27 +188,36 @@ local function InitDrag(target)
     end)
 end
 
-InitDrag(main)
-InitDrag(minimizeIcon)
+InitDrag(mainFrame)
+InitDrag(rinIcon)
 
--- MINIMIZE/RESTORE SYSTEM
+-- MINIMIZE SYSTEM
 local function ToggleGUI()
-    if main.Visible then
-        TS:Create(main, TweenInfo.new(0.3), {
+    if mainFrame.Visible then
+        TS:Create(mainFrame, TweenInfo.new(0.3), {
             Size = UDim2.new(0, 0, 0, 0),
-            Position = minimizeIcon.Position
+            Position = rinIcon.Position
         }):Play()
-        minimizeIcon.Visible = true
-        main.Visible = false
+        rinIcon.Visible = true
+        mainFrame.Visible = false
     else
-        main.Visible = true
-        TS:Create(main, TweenInfo.new(0.3), {
+        mainFrame.Visible = true
+        TS:Create(mainFrame, TweenInfo.new(0.3), {
             Size = UDim2.new(0, 220, 0, 250),
             Position = UDim2.new(0.5, -110, 0.5, -125)
         }):Play()
-        minimizeIcon.Visible = false
+        rinIcon.Visible = false
     end
 end
 
 closeBtn.MouseButton1Click:Connect(ToggleGUI)
-minimizeIcon.MouseButton1Click:Connect(ToggleGUI)
+rinIcon.MouseButton1Click:Connect(ToggleGUI)
+
+-- LOADING ANIMATION
+TS:Create(loadingText, TweenInfo.new(1), {TextTransparency = 0}):Play()
+wait(3)
+TS:Create(loadingFrame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+TS:Create(loadingText, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+wait(0.5)
+loadingGui:Destroy()
+mainGui.Enabled = true
