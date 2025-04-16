@@ -2,12 +2,15 @@ local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local TS = game:GetService("TweenService")
 
+-- Asset ID para kay Rin (palitan ng sariling image ID)
+local RIN_IMAGE = "rbxassetid://1234567890" -- Palitan ng tunay na ID
+
 local gui = Instance.new("ScreenGui")
 gui.ResetOnSpawn = false
 gui.Name = "RinHubUI"
-gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 
+-- Main Container
 local main = Instance.new("Frame")
 main.Size = UDim2.new(0, 220, 0, 250)
 main.Position = UDim2.new(0.5, -110, 0.5, -125)
@@ -17,162 +20,89 @@ main.BorderSizePixel = 0
 main.ClipsDescendants = true
 main.Parent = gui
 
--- Glass Effect
-local blur = Instance.new("BlurEffect")
-blur.Size = 10
-blur.Parent = main
+-- Exit Confirmation Dialog
+local confirmFrame = Instance.new("Frame")
+confirmFrame.Size = UDim2.new(1, 0, 1, 0)
+confirmFrame.BackgroundTransparency = 1
+confirmFrame.Visible = false
+confirmFrame.Parent = gui
 
--- UI Elements
-local stroke = Instance.new("UIStroke")
-stroke.Color = Color3.fromRGB(0, 255, 154)
-stroke.Thickness = 2
-stroke.Transparency = 0.1
-stroke.Parent = main
+local overlay = Instance.new("Frame")
+overlay.Size = UDim2.new(1, 0, 1, 0)
+overlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+overlay.BackgroundTransparency = 0.5
+overlay.Parent = confirmFrame
 
--- Header
-local header = Instance.new("Frame")
-header.Size = UDim2.new(1, 0, 0, 40)
-header.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-header.BackgroundTransparency = 0.7
-header.Parent = main
+local dialog = Instance.new("Frame")
+dialog.Size = UDim2.new(0, 200, 0, 230)
+dialog.Position = UDim2.new(0.5, -100, 0.5, -115)
+dialog.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+dialog.Parent = confirmFrame
+Instance.new("UICorner", dialog)
 
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -40, 1, 0)
-title.Position = UDim2.new(0, 10, 0, 0)
-title.Text = "RIN HUB v5"
-title.Font = Enum.Font.GothamBold
-title.TextColor3 = Color3.fromRGB(0, 255, 154)
-title.TextSize = 16
-title.BackgroundTransparency = 1
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.Parent = header
+local rinImage = Instance.new("ImageLabel")
+rinImage.Size = UDim2.new(0, 150, 0, 150)
+rinImage.Position = UDim2.new(0.5, -75, 0, 10)
+rinImage.Image = RIN_IMAGE
+rinImage.Parent = dialog
 
--- Close Button
-local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 30, 0, 30)
-closeBtn.Position = UDim2.new(1, -35, 0.5, -15)
-closeBtn.Text = "×"
-closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
-closeBtn.TextSize = 24
-closeBtn.BackgroundTransparency = 1
-closeBtn.Parent = header
+local confirmText = Instance.new("TextLabel")
+confirmText.Size = UDim2.new(1, -20, 0, 40)
+confirmText.Position = UDim2.new(0, 10, 0, 170)
+confirmText.Text = "Sure ka ba na gusto mong umexit?"
+confirmText.Font = Enum.Font.GothamBold
+confirmText.TextColor3 = Color3.fromRGB(255, 255, 255)
+confirmText.TextSize = 14
+confirmText.BackgroundTransparency = 1
+confirmText.Parent = dialog
 
--- Modern Toggle Function
-local function createModernToggle(text, yPos)
-    local container = Instance.new("Frame")
-    container.Size = UDim2.new(1, -20, 0, 30)
-    container.Position = UDim2.new(0, 10, 0, yPos)
-    container.BackgroundTransparency = 1
-    container.Parent = main
+local buttonFrame = Instance.new("Frame")
+buttonFrame.Size = UDim2.new(1, 0, 0, 30)
+buttonFrame.Position = UDim2.new(0, 0, 1, -40)
+buttonFrame.BackgroundTransparency = 1
+buttonFrame.Parent = dialog
 
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(0.7, 0, 1, 0)
-    label.Text = text
-    label.Font = Enum.Font.Gotham
-    label.TextColor3 = Color3.fromRGB(200, 200, 200)
-    label.TextSize = 14
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.BackgroundTransparency = 1
-    label.Parent = container
+local yesBtn = Instance.new("TextButton")
+yesBtn.Size = UDim2.new(0.4, 0, 1, 0)
+yesBtn.Text = "Oo"
+yesBtn.Font = Enum.Font.GothamBold
+yesBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
+yesBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+yesBtn.Parent = buttonFrame
+Instance.new("UICorner", yesBtn)
 
-    local toggleFrame = Instance.new("Frame")
-    toggleFrame.Size = UDim2.new(0, 50, 0, 25)
-    toggleFrame.Position = UDim2.new(1, -50, 0.5, -12.5)
-    toggleFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    toggleFrame.Parent = container
-    Instance.new("UICorner", toggleFrame).CornerRadius = UDim.new(1, 0)
+local noBtn = Instance.new("TextButton")
+noBtn.Size = UDim2.new(0.4, 0, 1, 0)
+noBtn.Position = UDim2.new(1, -80, 0, 0)
+noBtn.Text = "Hindi"
+noBtn.Font = Enum.Font.GothamBold
+noBtn.TextColor3 = Color3.fromRGB(0, 255, 154)
+noBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+noBtn.Parent = buttonFrame
+Instance.new("UICorner", noBtn)
 
-    local toggleDot = Instance.new("Frame")
-    toggleDot.Size = UDim2.new(0, 21, 0, 21)
-    toggleDot.Position = UDim2.new(0, 2, 0.5, -10.5)
-    toggleDot.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
-    toggleDot.Parent = toggleFrame
-    Instance.new("UICorner", toggleDot).CornerRadius = UDim.new(1, 0)
-
-    local isToggled = false
-    local function updateToggle()
-        local newPos = isToggled and UDim2.new(1, -23, 0.5, -10.5) or UDim2.new(0, 2, 0.5, -10.5)
-        TS:Create(toggleDot, TweenInfo.new(0.2), {Position = newPos}):Play()
-        TS:Create(toggleFrame, TweenInfo.new(0.2), {BackgroundColor3 = isToggled and Color3.fromRGB(0, 255, 154) or Color3.fromRGB(40, 40, 40)}):Play()
-    end
-
-    toggleFrame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            isToggled = not isToggled
-            updateToggle()
-        end
-    end)
-
-    return {
-        Container = container,
-        Toggle = toggleFrame,
-        SetState = function(state)
-            isToggled = state
-            updateToggle()
-        end
-    }
+-- Close Button Functionality
+local function showExitConfirm()
+    confirmFrame.Visible = true
+    TS:Create(confirmFrame, TweenInfo.new(0.3), {BackgroundTransparency = 0.5}):Play()
+    TS:Create(dialog, TweenInfo.new(0.3), {Position = UDim2.new(0.5, -100, 0.5, -115)}):Play()
 end
 
--- Add Features
-local toggles = {
-    createModernToggle("Freeze Trade", 50),
-    createModernToggle("Auto Accept", 90),
-    createModernToggle("Auto Add Items", 130)
-}
+local function hideExitConfirm()
+    TS:Create(confirmFrame, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+    TS:Create(dialog, TweenInfo.new(0.3), {Position = UDim2.new(0.5, -100, 0.4, -115)}):Play()
+    wait(0.3)
+    confirmFrame.Visible = false
+end
 
--- Add Best Fruit Button
-local fruitBtn = Instance.new("TextButton")
-fruitBtn.Size = UDim2.new(1, -20, 0, 35)
-fruitBtn.Position = UDim2.new(0, 10, 0, 170)
-fruitBtn.Text = "ADD BEST FRUIT"
-fruitBtn.Font = Enum.Font.GothamBold
-fruitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-fruitBtn.TextSize = 14
-fruitBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 154)
-fruitBtn.AutoButtonColor = false
-fruitBtn.Parent = main
-Instance.new("UICorner", fruitBtn).CornerRadius = UDim.new(0, 6)
-
--- Button Effects
-fruitBtn.MouseEnter:Connect(function()
-    TS:Create(fruitBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 200, 120)}):Play()
-end)
-
-fruitBtn.MouseLeave:Connect(function()
-    TS:Create(fruitBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 255, 154)}):Play()
-end)
-
--- Drag System
-local drag = {Enabled = false, Start = nil, StartPosition = nil}
-main.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        drag.Enabled = true
-        drag.Start = input.Position
-        drag.StartPosition = main.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                drag.Enabled = false
-            end
-        end)
-    end
-end)
-
-UIS.InputChanged:Connect(function(input)
-    if drag.Enabled and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - drag.Start
-        main.Position = UDim2.new(
-            drag.StartPosition.X.Scale,
-            drag.StartPosition.X.Offset + delta.X,
-            drag.StartPosition.Y.Scale,
-            drag.StartPosition.Y.Offset + delta.Y
-        )
-    end
-end)
-
--- Close Function
-closeBtn.MouseButton1Click:Connect(function()
+yesBtn.MouseButton1Click:Connect(function()
+    hideExitConfirm()
     TS:Create(main, TweenInfo.new(0.3), {Size = UDim2.new(0, 0, 0, 0)}):Play()
     wait(0.3)
     gui:Destroy()
 end)
+
+noBtn.MouseButton1Click:Connect(hideExitConfirm)
+
+-- Original Close Button (I-update ang existing code)
+closeBtn.MouseButton1Click:Connect(showExitConfirm)
