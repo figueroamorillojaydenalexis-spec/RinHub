@@ -2,58 +2,63 @@ local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local TS = game:GetService("TweenService")
 
--- MAIN GUI
 local mainGui = Instance.new("ScreenGui")
 mainGui.ResetOnSpawn = false
 mainGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 
--- MAIN WINDOW
+-- MAIN WINDOW (NEON GREEN THEME)
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 220, 0, 250)
 mainFrame.Position = UDim2.new(0.5, -110, 0.5, -125)
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-mainFrame.BackgroundTransparency = 0.3
+mainFrame.BackgroundColor3 = Color3.fromRGB(0, 255, 154) -- Neon green
+mainFrame.BackgroundTransparency = 0.2 -- Mas solid
 mainFrame.BorderSizePixel = 0
 mainFrame.ClipsDescendants = true
 mainFrame.Parent = mainGui
 
--- RIN MINIMIZE ICON
+-- GLOW EFFECT
+local glow = Instance.new("ImageLabel")
+glow.Size = UDim2.new(1, 40, 1, 40)
+glow.Position = UDim2.new(0, -20, 0, -20)
+glow.Image = "rbxassetid://5028857474" -- Green glow asset
+glow.ImageColor3 = Color3.fromRGB(0, 255, 154)
+glow.ScaleType = Enum.ScaleType.Slice
+glow.SliceCenter = Rect.new(20, 20, 280, 280)
+glow.BackgroundTransparency = 1
+glow.Parent = mainFrame
+
+-- MINIMIZE ICON (SIMPLIFIED)
 local rinIcon = Instance.new("ImageButton")
 rinIcon.Name = "RinIcon"
-rinIcon.Size = UDim2.new(0, 60, 0, 60)
-rinIcon.Image = "rbxassetid://15454081378"
-rinIcon.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-rinIcon.BackgroundTransparency = 0.3
-rinIcon.ScaleType = Enum.ScaleType.Crop
+rinIcon.Size = UDim2.new(0, 40, 0, 40)
+rinIcon.Position = UDim2.new(0, 20, 1, -60)
+rinIcon.Image = "rbxassetid://15454081378" -- Your asset ID
+rinIcon.BackgroundTransparency = 1
 rinIcon.Visible = false
-rinIcon.ZIndex = 999
 rinIcon.Parent = mainGui
 
--- CIRCLE EFFECT
-Instance.new("UICorner", rinIcon).CornerRadius = UDim.new(1, 0)
-
--- HEADER
+-- HEADER (NEON STYLE)
 local header = Instance.new("Frame")
-header.Size = UDim2.new(1, 0, 0, 40)
-header.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-header.BackgroundTransparency = 0.7
+header.Size = UDim2.new(1, -10, 0, 30)
+header.Position = UDim2.new(0, 5, 0, 5)
+header.BackgroundTransparency = 1
 header.Parent = mainFrame
 
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -40, 1, 0)
-title.Position = UDim2.new(0, 10, 0, 0)
+title.Size = UDim2.new(1, 0, 1, 0)
 title.Text = "RIN HUB v5"
-title.Font = Enum.Font.GothamBold
-title.TextColor3 = Color3.fromRGB(0, 255, 154)
-title.TextSize = 16
+title.Font = Enum.Font.GothamBlack
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 18
+title.TextStrokeColor3 = Color3.fromRGB(0, 255, 154)
+title.TextStrokeTransparency = 0.3
 title.BackgroundTransparency = 1
-title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = header
 
--- CLOSE BUTTON
+-- MODERN CLOSE BUTTON
 local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 30, 0, 30)
-closeBtn.Position = UDim2.new(1, -35, 0.5, -15)
+closeBtn.Size = UDim2.new(0, 25, 0, 25)
+closeBtn.Position = UDim2.new(1, -30, 0, 5)
 closeBtn.Text = "×"
 closeBtn.Font = Enum.Font.GothamBold
 closeBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
@@ -61,7 +66,7 @@ closeBtn.TextSize = 24
 closeBtn.BackgroundTransparency = 1
 closeBtn.Parent = header
 
--- TOGGLE SYSTEM
+-- TOGGLE SYSTEM (NEON STYLE)
 local function CreateToggle(text, yPosition)
     local container = Instance.new("Frame")
     container.Size = UDim2.new(1, -20, 0, 30)
@@ -72,8 +77,8 @@ local function CreateToggle(text, yPosition)
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(0.7, 0, 1, 0)
     label.Text = text
-    label.Font = Enum.Font.Gotham
-    label.TextColor3 = Color3.fromRGB(200, 200, 200)
+    label.Font = Enum.Font.GothamBold
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
     label.TextSize = 14
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.BackgroundTransparency = 1
@@ -82,14 +87,14 @@ local function CreateToggle(text, yPosition)
     local toggleFrame = Instance.new("Frame")
     toggleFrame.Size = UDim2.new(0, 50, 0, 25)
     toggleFrame.Position = UDim2.new(1, -50, 0.5, -12.5)
-    toggleFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    toggleFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
     toggleFrame.Parent = container
     Instance.new("UICorner", toggleFrame).CornerRadius = UDim.new(1, 0)
 
     local toggleDot = Instance.new("Frame")
     toggleDot.Size = UDim2.new(0, 21, 0, 21)
     toggleDot.Position = UDim2.new(0, 2, 0.5, -10.5)
-    toggleDot.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
+    toggleDot.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
     toggleDot.Parent = toggleFrame
     Instance.new("UICorner", toggleDot).CornerRadius = UDim.new(1, 0)
 
@@ -97,7 +102,7 @@ local function CreateToggle(text, yPosition)
     local function UpdateToggle()
         local newPos = isToggled and UDim2.new(1, -23, 0.5, -10.5) or UDim2.new(0, 2, 0.5, -10.5)
         TS:Create(toggleDot, TweenInfo.new(0.2), {Position = newPos}):Play()
-        TS:Create(toggleFrame, TweenInfo.new(0.2), {BackgroundColor3 = isToggled and Color3.fromRGB(0, 255, 154) or Color3.fromRGB(40, 40, 40)}):Play()
+        TS:Create(toggleFrame, TweenInfo.new(0.2), {BackgroundColor3 = isToggled and Color3.fromRGB(0, 255, 154) or Color3.fromRGB(50, 50, 50)}):Play()
     end
 
     toggleFrame.InputBegan:Connect(function(input)
@@ -115,22 +120,22 @@ CreateToggle("Freeze Trade", 50)
 CreateToggle("Auto Accept", 90)
 CreateToggle("Auto Add Items", 130)
 
--- ADD BEST FRUIT BUTTON
+-- ADD BEST FRUIT BUTTON (NEON STYLE)
 local fruitBtn = Instance.new("TextButton")
 fruitBtn.Size = UDim2.new(1, -20, 0, 35)
 fruitBtn.Position = UDim2.new(0, 10, 0, 170)
 fruitBtn.Text = "ADD BEST FRUIT"
-fruitBtn.Font = Enum.Font.GothamBold
-fruitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+fruitBtn.Font = Enum.Font.GothamBlack
+fruitBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
 fruitBtn.TextSize = 14
 fruitBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 154)
 fruitBtn.AutoButtonColor = false
 fruitBtn.Parent = mainFrame
 Instance.new("UICorner", fruitBtn).CornerRadius = UDim.new(0, 6)
 
--- BUTTON EFFECTS
+-- BUTTON HOVER EFFECTS
 fruitBtn.MouseEnter:Connect(function()
-    TS:Create(fruitBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 200, 120)}):Play()
+    TS:Create(fruitBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 230, 140)}):Play()
 end)
 fruitBtn.MouseLeave:Connect(function()
     TS:Create(fruitBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 255, 154)}):Play()
