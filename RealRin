@@ -17,17 +17,31 @@ main.BorderSizePixel = 0
 main.ClipsDescendants = true
 main.Parent = gui
 
--- MINIMIZE ICON (RIN IMAGE)
+-- MINIMIZE ICON (WITH SAMPLE IMAGE)
 local minimizeIcon = Instance.new("ImageButton")
 minimizeIcon.Name = "RinIcon"
 minimizeIcon.Size = UDim2.new(0, 60, 0, 60)
 minimizeIcon.Position = UDim2.new(0, 20, 1, -80)
-minimizeIcon.Image = "rbxassetid://97994335210203"
-minimizeIcon.BackgroundTransparency = 1
-minimizeIcon.ScaleType = Enum.ScaleType.Fit
+minimizeIcon.Image = "rbxassetid://6956135794"  -- Sample valid image ID
+minimizeIcon.ImageColor3 = Color3.new(1,1,1)
+minimizeIcon.ImageTransparency = 0
+minimizeIcon.BackgroundColor3 = Color3.new(0,0,0)
+minimizeIcon.BackgroundTransparency = 0.5
+minimizeIcon.ScaleType = Enum.ScaleType.Crop
 minimizeIcon.Visible = false
 minimizeIcon.ZIndex = 10
 minimizeIcon.Parent = gui
+
+-- CIRCLE EFFECT
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(1, 0)
+corner.Parent = minimizeIcon
+
+-- BORDER
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.new(1,1,1)
+stroke.Thickness = 2
+stroke.Parent = minimizeIcon
 
 -- HEADER
 local header = Instance.new("Frame")
