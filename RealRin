@@ -2,9 +2,6 @@ local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local TS = game:GetService("TweenService")
 
--- Asset ID para kay Rin
-local RIN_IMAGE = "rbxassetid://97994335210203"
-
 local gui = Instance.new("ScreenGui")
 gui.ResetOnSpawn = false
 gui.Name = "RinHubUI"
@@ -13,23 +10,18 @@ gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 -- Main Container
 local main = Instance.new("Frame")
 main.Size = UDim2.new(0, 220, 0, 250)
-main.Position = UDim2.new(1, -240, 0.5, -125) -- Start sa right side
+main.Position = UDim2.new(0.5, -110, 0.5, -125)
 main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 main.BackgroundTransparency = 0.3
 main.BorderSizePixel = 0
 main.ClipsDescendants = true
 main.Parent = gui
 
--- Entrance Animation
-TS:Create(main, TweenInfo.new(0.5, Enum.EasingStyle.Quad), {
-    Position = UDim2.new(0.5, -110, 0.5, -125)
-}):Play()
-
--- Minimize Icon (Initially hidden)
+-- Minimize Icon
 local minimizeIcon = Instance.new("ImageButton")
 minimizeIcon.Size = UDim2.new(0, 50, 0, 50)
 minimizeIcon.Position = UDim2.new(1, -60, 1, -60)
-minimizeIcon.Image = RIN_IMAGE
+minimizeIcon.Image = "rbxassetid://97994335210203"
 minimizeIcon.BackgroundColor3 = Color3.fromRGB(0, 255, 154)
 minimizeIcon.ScaleType = Enum.ScaleType.Crop
 minimizeIcon.Visible = false
@@ -54,7 +46,7 @@ title.BackgroundTransparency = 1
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = header
 
--- Minimize Button (X Button)
+-- Close Button
 local closeBtn = Instance.new("TextButton")
 closeBtn.Size = UDim2.new(0, 30, 0, 30)
 closeBtn.Position = UDim2.new(1, -35, 0.5, -15)
@@ -132,18 +124,18 @@ fruitBtn.AutoButtonColor = false
 fruitBtn.Parent = main
 Instance.new("UICorner", fruitBtn).CornerRadius = UDim.new(0, 6)
 
--- Button Hover Effects
+-- Button Effects
 fruitBtn.MouseEnter:Connect(function()
     TS:Create(fruitBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 200, 120)}):Play()
 end)
+
 fruitBtn.MouseLeave:Connect(function()
     TS:Create(fruitBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 255, 154)}):Play()
 end)
 
--- Minimize Functionality
+-- Minimize Function
 local function toggleGUI()
     if main.Visible then
-        -- Minimize
         TS:Create(main, TweenInfo.new(0.3), {
             Position = UDim2.new(1, -60, 1, -60),
             Size = UDim2.new(0, 0, 0, 0)
@@ -151,7 +143,6 @@ local function toggleGUI()
         minimizeIcon.Visible = true
         main.Visible = false
     else
-        -- Restore
         main.Visible = true
         TS:Create(main, TweenInfo.new(0.3), {
             Position = UDim2.new(0.5, -110, 0.5, -125),
