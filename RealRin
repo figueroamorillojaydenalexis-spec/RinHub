@@ -40,13 +40,13 @@ mainFrame.BorderSizePixel = 0
 mainFrame.ClipsDescendants = true
 mainFrame.Parent = mainGui
 
--- RIN MINIMIZE ICON
+-- RIN MINIMIZE ICON (YOUR ASSET ID)
 local rinIcon = Instance.new("ImageButton")
 rinIcon.Name = "RinIcon"
 rinIcon.Size = UDim2.new(0, 60, 0, 60)
-rinIcon.Image = "rbxassetid://71938939139112"
+rinIcon.Image = "rbxassetid://15454081378"
 rinIcon.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-rinIcon.BackgroundTransparency = 0.5
+rinIcon.BackgroundTransparency = 0.3
 rinIcon.ScaleType = Enum.ScaleType.Crop
 rinIcon.Visible = false
 rinIcon.ZIndex = 999
@@ -221,3 +221,7 @@ TS:Create(loadingText, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
 wait(0.5)
 loadingGui:Destroy()
 mainGui.Enabled = true
+
+-- DEBUGGING
+print("Asset Verification: https://www.roblox.com/library/15454081378")
+print("Rin Icon Visible:", rinIcon.Visible)
