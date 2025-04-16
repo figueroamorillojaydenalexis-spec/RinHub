@@ -17,156 +17,55 @@ main.BorderSizePixel = 0
 main.ClipsDescendants = true
 main.Parent = gui
 
--- Minimize Icon
+-- Minimize Icon (Draggable)
 local minimizeIcon = Instance.new("ImageButton")
 minimizeIcon.Size = UDim2.new(0, 50, 0, 50)
-minimizeIcon.Position = UDim2.new(1, -60, 1, -60)
-minimizeIcon.Image = "rbxassetid://97994335210203"
+minimizeIcon.Position = UDim2.new(0, 10, 1, -60) -- Start position
+minimizeIcon.Image = "rbxassetid://97994335210203" -- Gamit ang asset ID mo
 minimizeIcon.BackgroundColor3 = Color3.fromRGB(0, 255, 154)
 minimizeIcon.ScaleType = Enum.ScaleType.Crop
 minimizeIcon.Visible = false
+minimizeIcon.ImageTransparency = 0 -- Siguraduhing visible ang image
 minimizeIcon.Parent = gui
 Instance.new("UICorner", minimizeIcon).CornerRadius = UDim.new(1, 0)
 
--- Header
-local header = Instance.new("Frame")
-header.Size = UDim2.new(1, 0, 0, 40)
-header.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-header.BackgroundTransparency = 0.7
-header.Parent = main
+-- Iba pang elements...
+-- [Idagdag dito ang header, toggles, at buttons mula sa previous code]
 
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -40, 1, 0)
-title.Position = UDim2.new(0, 10, 0, 0)
-title.Text = "RIN HUB v5"
-title.Font = Enum.Font.GothamBold
-title.TextColor3 = Color3.fromRGB(0, 255, 154)
-title.TextSize = 16
-title.BackgroundTransparency = 1
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.Parent = header
+-- Drag System para sa BOTH main at icon
+local drag = {Enabled = false, Target = nil, Start = nil, StartPosition = nil}
 
--- Close Button
-local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 30, 0, 30)
-closeBtn.Position = UDim2.new(1, -35, 0.5, -15)
-closeBtn.Text = "×"
-closeBtn.Font = Enum.Font.GothamBold
-closeBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
-closeBtn.TextSize = 24
-closeBtn.BackgroundTransparency = 1
-closeBtn.Parent = header
-
--- Toggle Function
-local function createModernToggle(text, yPos)
-    local container = Instance.new("Frame")
-    container.Size = UDim2.new(1, -20, 0, 30)
-    container.Position = UDim2.new(0, 10, 0, yPos)
-    container.BackgroundTransparency = 1
-    container.Parent = main
-
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(0.7, 0, 1, 0)
-    label.Text = text
-    label.Font = Enum.Font.Gotham
-    label.TextColor3 = Color3.fromRGB(200, 200, 200)
-    label.TextSize = 14
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.BackgroundTransparency = 1
-    label.Parent = container
-
-    local toggleFrame = Instance.new("Frame")
-    toggleFrame.Size = UDim2.new(0, 50, 0, 25)
-    toggleFrame.Position = UDim2.new(1, -50, 0.5, -12.5)
-    toggleFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    toggleFrame.Parent = container
-    Instance.new("UICorner", toggleFrame).CornerRadius = UDim.new(1, 0)
-
-    local toggleDot = Instance.new("Frame")
-    toggleDot.Size = UDim2.new(0, 21, 0, 21)
-    toggleDot.Position = UDim2.new(0, 2, 0.5, -10.5)
-    toggleDot.BackgroundColor3 = Color3.fromRGB(150, 150, 150)
-    toggleDot.Parent = toggleFrame
-    Instance.new("UICorner", toggleDot).CornerRadius = UDim.new(1, 0)
-
-    local isToggled = false
-    local function updateToggle()
-        local newPos = isToggled and UDim2.new(1, -23, 0.5, -10.5) or UDim2.new(0, 2, 0.5, -10.5)
-        TS:Create(toggleDot, TweenInfo.new(0.2), {Position = newPos}):Play()
-        TS:Create(toggleFrame, TweenInfo.new(0.2), {BackgroundColor3 = isToggled and Color3.fromRGB(0, 255, 154) or Color3.fromRGB(40, 40, 40)}):Play()
-    end
-
-    toggleFrame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            isToggled = not isToggled
-            updateToggle()
-        end
-    end)
-
-    return container
+local function startDragging(target)
+    drag.Target = target
+    drag.Enabled = true
+    drag.Start = UIS:GetMouseLocation()
+    drag.StartPosition = target.Position
 end
 
--- Add Toggles
-createModernToggle("Freeze Trade", 50)
-createModernToggle("Auto Accept", 90)
-createModernToggle("Auto Add Items", 130)
-
--- Add Best Fruit Button
-local fruitBtn = Instance.new("TextButton")
-fruitBtn.Size = UDim2.new(1, -20, 0, 35)
-fruitBtn.Position = UDim2.new(0, 10, 0, 170)
-fruitBtn.Text = "ADD BEST FRUIT"
-fruitBtn.Font = Enum.Font.GothamBold
-fruitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-fruitBtn.TextSize = 14
-fruitBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 154)
-fruitBtn.AutoButtonColor = false
-fruitBtn.Parent = main
-Instance.new("UICorner", fruitBtn).CornerRadius = UDim.new(0, 6)
-
--- Button Effects
-fruitBtn.MouseEnter:Connect(function()
-    TS:Create(fruitBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 200, 120)}):Play()
-end)
-
-fruitBtn.MouseLeave:Connect(function()
-    TS:Create(fruitBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 255, 154)}):Play()
-end)
-
--- Minimize Function
-local function toggleGUI()
-    if main.Visible then
-        TS:Create(main, TweenInfo.new(0.3), {
-            Position = UDim2.new(1, -60, 1, -60),
-            Size = UDim2.new(0, 0, 0, 0)
-        }):Play()
-        minimizeIcon.Visible = true
-        main.Visible = false
-    else
-        main.Visible = true
-        TS:Create(main, TweenInfo.new(0.3), {
-            Position = UDim2.new(0.5, -110, 0.5, -125),
-            Size = UDim2.new(0, 220, 0, 250)
-        }):Play()
-        minimizeIcon.Visible = false
-    end
+local function stopDragging()
+    drag.Enabled = false
+    drag.Target = nil
 end
 
--- Button Connections
-closeBtn.MouseButton1Click:Connect(toggleGUI)
-minimizeIcon.MouseButton1Click:Connect(toggleGUI)
-
--- Drag System
-local drag = {Enabled = false, Start = nil, StartPosition = nil}
+-- Para sa main frame
 main.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        drag.Enabled = true
-        drag.Start = input.Position
-        drag.StartPosition = main.Position
-        
+        startDragging(main)
         input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
-                drag.Enabled = false
+                stopDragging()
+            end
+        end)
+    end
+end)
+
+-- Para sa minimize icon
+minimizeIcon.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        startDragging(minimizeIcon)
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                stopDragging()
             end
         end)
     end
@@ -174,8 +73,8 @@ end)
 
 UIS.InputChanged:Connect(function(input)
     if drag.Enabled and input.UserInputType == Enum.UserInputType.MouseMovement then
-        local delta = input.Position - drag.Start
-        main.Position = UDim2.new(
+        local delta = UIS:GetMouseLocation() - drag.Start
+        drag.Target.Position = UDim2.new(
             drag.StartPosition.X.Scale,
             drag.StartPosition.X.Offset + delta.X,
             drag.StartPosition.Y.Scale,
@@ -183,3 +82,26 @@ UIS.InputChanged:Connect(function(input)
         )
     end
 end)
+
+-- Minimize Function (Gamit ang previous toggle system)
+local function toggleGUI()
+    if main.Visible then
+        TS:Create(main, TweenInfo.new(0.3), {
+            Size = UDim2.new(0, 0, 0, 0),
+            Position = minimizeIcon.Position
+        }):Play()
+        minimizeIcon.Visible = true
+        main.Visible = false
+    else
+        main.Visible = true
+        TS:Create(main, TweenInfo.new(0.3), {
+            Size = UDim2.new(0, 220, 0, 250),
+            Position = UDim2.new(0.5, -110, 0.5, -125)
+        }):Play()
+        minimizeIcon.Visible = false
+    end
+end
+
+-- I-connect ang mga buttons
+closeBtn.MouseButton1Click:Connect(toggleGUI)
+minimizeIcon.MouseButton1Click:Connect(toggleGUI)
