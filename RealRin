@@ -10,13 +10,13 @@ gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 local main = Instance.new("Frame")
 main.Size = UDim2.new(0, 200, 0, 200)
 main.Position = UDim2.new(0.5, -100, 0.5, -100)
-main.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+main.BackgroundColor3 = Color3.fromRGB(40, 0, 0)  -- Dark red base color
 main.BorderSizePixel = 0
 main.Parent = gui
 Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
 
 local stroke = Instance.new("UIStroke")
-stroke.Color = Color3.fromRGB(0, 255, 100)
+stroke.Color = Color3.fromRGB(120, 0, 0)  -- Dark red stroke
 stroke.Thickness = 2
 stroke.Transparency = 0.3
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
@@ -24,8 +24,8 @@ stroke.Parent = main
 
 local bg = Instance.new("UIGradient")
 bg.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 150)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 180, 80))
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 0, 0)),  -- Dark red gradient start
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 0, 0))   -- Darker red gradient end
 })
 bg.Parent = main
 
@@ -34,7 +34,7 @@ shadow.Size = UDim2.new(1, 30, 1, 30)
 shadow.Position = UDim2.new(0, -15, 0, -15)
 shadow.BackgroundTransparency = 1
 shadow.Image = "rbxassetid://297774371"
-shadow.ImageColor3 = Color3.fromRGB(0, 255, 100)
+shadow.ImageColor3 = Color3.fromRGB(120, 0, 0)  -- Dark red shadow
 shadow.ImageTransparency = 0.6
 shadow.Parent = main
 
@@ -52,7 +52,7 @@ local function makeToggle(text, yPos)
     local base = Instance.new("Frame")
     base.Size = UDim2.new(0.9, 0, 0, 30)
     base.Position = UDim2.new(0.5, 0, 0, yPos)
-    base.BackgroundColor3 = Color3.fromRGB(0, 100, 0)
+    base.BackgroundColor3 = Color3.fromRGB(40, 0, 0)  -- Dark red toggle base
     base.BorderSizePixel = 0
     base.AnchorPoint = Vector2.new(0.5, 0)
     base.Parent = main
@@ -61,7 +61,7 @@ local function makeToggle(text, yPos)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 40, 0, 20)
     btn.Position = UDim2.new(1, -45, 0.5, -10)
-    btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- black when OFF
+    btn.BackgroundColor3 = Color3.fromRGB(20, 0, 0)  -- Darker red when OFF
     btn.BorderSizePixel = 0
     btn.Text = ""
     btn.Parent = base
@@ -90,7 +90,7 @@ local function makeToggle(text, yPos)
     btn.MouseButton1Click:Connect(function()
         on = not on
         local goals = {
-            [btn] = {BackgroundColor3 = on and Color3.fromRGB(0, 255, 127) or Color3.fromRGB(0, 0, 0)},
+            [btn] = {BackgroundColor3 = on and Color3.fromRGB(180, 0, 0) or Color3.fromRGB(20, 0, 0)},  -- Bright red when ON
             [dot] = {Position = on and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)}
         }
         for obj, goal in pairs(goals) do
@@ -109,18 +109,16 @@ local fruitBtn = Instance.new("TextButton")
 fruitBtn.Size = UDim2.new(0.9, 0, 0, 30)
 fruitBtn.Position = UDim2.new(0.5, 0, 0, 160)
 fruitBtn.AnchorPoint = Vector2.new(0.5, 0)
-fruitBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-fruitBtn.TextColor3 = Color3.fromRGB(0, 255, 0)
+fruitBtn.BackgroundColor3 = Color3.fromRGB(20, 0, 0)  -- Dark red button
+fruitBtn.TextColor3 = Color3.fromRGB(255, 100, 100)  -- Light red text
 fruitBtn.Text = "Add Best Fruit"
 fruitBtn.Font = Enum.Font.GothamBold
 fruitBtn.TextSize = 14
 fruitBtn.Parent = main
 Instance.new("UICorner", fruitBtn).CornerRadius = UDim.new(0, 6)
 
--- Optional functionality:
 fruitBtn.MouseButton1Click:Connect(function()
     print("Best fruit added!")
-    -- Add your custom logic here
 end)
 
 -- Drag logic
