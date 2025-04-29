@@ -7,9 +7,53 @@ gui.ResetOnSpawn = false
 gui.Name = "RinHubUI"
 gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 
+-- Confirm Exit Popup
+local confirmFrame = Instance.new("Frame")
+confirmFrame.Size = UDim2.new(0, 200, 0, 100)
+confirmFrame.Position = UDim2.new(0.5, -100, 0.5, -50)
+confirmFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+confirmFrame.BorderSizePixel = 2
+confirmFrame.Visible = false
+confirmFrame.Parent = gui
+
+local confirmCorner = Instance.new("UICorner")
+confirmCorner.CornerRadius = UDim.new(0, 8)
+confirmCorner.Parent = confirmFrame
+
+local confirmText = Instance.new("TextLabel")
+confirmText.Size = UDim2.new(1, -20, 0.5, 0)
+confirmText.Position = UDim2.new(0, 10, 0, 5)
+confirmText.BackgroundTransparency = 1
+confirmText.Text = "Are you sure you want to exit?"
+confirmText.TextColor3 = Color3.fromRGB(0, 0, 0)
+confirmText.TextSize = 14
+confirmText.Font = Enum.Font.Gotham
+confirmText.TextWrapped = true
+confirmText.Parent = confirmFrame
+
+local yesBtn = Instance.new("TextButton")
+yesBtn.Size = UDim2.new(0.4, 0, 0.3, 0)
+yesBtn.Position = UDim2.new(0.1, 0, 0.6, 0)
+yesBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 127)
+yesBtn.Text = "Yes"
+yesBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+yesBtn.Font = Enum.Font.GothamBold
+yesBtn.TextSize = 14
+yesBtn.Parent = confirmFrame
+
+local noBtn = Instance.new("TextButton")
+noBtn.Size = UDim2.new(0.4, 0, 0.3, 0)
+noBtn.Position = UDim2.new(0.5, 0, 0.6, 0)
+noBtn.BackgroundColor3 = Color3.fromRGB(255, 99, 71)
+noBtn.Text = "No"
+noBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+noBtn.Font = Enum.Font.GothamBold
+noBtn.TextSize = 14
+noBtn.Parent = confirmFrame
+
 -- Main Frame
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 200, 0, 230) -- Adjusted height for "Add Best Fruit"
+main.Size = UDim2.new(0, 200, 0, 230)
 main.Position = UDim2.new(0.5, -100, 0.5, -115)
 main.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
 main.BorderSizePixel = 0
@@ -93,25 +137,13 @@ contentFrame.Position = UDim2.new(0, 5, 0, 35)
 contentFrame.BackgroundTransparency = 1
 contentFrame.Parent = main
 
--- Update contentFrame size dynamically
-local function updateContentFrameSize()
-    local contentHeight = 35  -- Starting height for title bar
-
-    -- Add the height of each toggle button and the "Add Best Fruit" button
-    contentHeight = contentHeight + 30 * 3 + 30  -- 3 toggles + 1 fruit button
-    
-    -- Update content frame size based on calculated height
-    contentFrame.Size = UDim2.new(1, -10, 0, contentHeight - 45)
-    main.Size = UDim2.new(0, 200, 0, contentHeight + 35)  -- Adjust main frame height accordingly
-end
-
--- Make Toggle Button Function (fixed)
+-- Make Toggle Button
 local function makeToggle(text, order)
     local base = Instance.new("Frame")
     base.Size = UDim2.new(0.9, 0, 0, 30)
     base.Position = UDim2.new(0.5, 0, 0, (order - 1) * 40)
     base.AnchorPoint = Vector2.new(0.5, 0)
-    base.BackgroundColor3 = Color3.fromRGB(3, 244, 202) -- Teal background
+    base.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
     base.BorderSizePixel = 0
     base.Parent = contentFrame
 
@@ -124,7 +156,7 @@ local function makeToggle(text, order)
     txt.Position = UDim2.new(0, 10, 0, 0)
     txt.BackgroundTransparency = 1
     txt.Text = text
-    txt.TextColor3 = Color3.fromRGB(0, 0, 0) -- Black text
+    txt.TextColor3 = Color3.fromRGB(0, 0, 0)
     txt.TextSize = 14
     txt.Font = Enum.Font.Gotham
     txt.TextXAlignment = Enum.TextXAlignment.Left
@@ -164,13 +196,11 @@ local function makeToggle(text, order)
     end)
 end
 
--- Create Toggles
 makeToggle("Freeze Trade", 1)
 makeToggle("Auto Accept", 2)
 makeToggle("Auto Add Items", 3)
-updateContentFrameSize()
 
--- "Add Best Fruit" Button (fixed)
+-- "Add Best Fruit" Button
 local fruitBtn = Instance.new("TextButton")
 fruitBtn.Size = UDim2.new(0.9, 0, 0, 30)
 fruitBtn.Position = UDim2.new(0.5, 0, 0, 120)
@@ -204,8 +234,12 @@ minimizeBtn.MouseButton1Click:Connect(function()
     bg.Visible = not minimized
 end)
 
--- Exit Function
+-- Exit Function with Confirmation
 exitBtn.MouseButton1Click:Connect(function()
+    confirmFrame.Visible = true
+end)
+
+yesBtn.MouseButton1Click:Connect(function()
     TS:Create(main, TweenInfo.new(0.2), {
         Size = UDim2.new(0, 0, 0, 0),
         Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -214,11 +248,15 @@ exitBtn.MouseButton1Click:Connect(function()
     gui:Destroy()
 end)
 
--- Drag TitleBar
+noBtn.MouseButton1Click:Connect(function()
+    confirmFrame.Visible = false
+end)
+
+-- Drag TitleBar (support Mouse and Touch)
 local drag = { enabled = false, start = nil, startPos = nil }
 
 titleBar.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         drag.enabled = true
         drag.start = input.Position
         drag.startPos = main.Position
@@ -231,7 +269,7 @@ titleBar.InputBegan:Connect(function(input)
 end)
 
 UIS.InputChanged:Connect(function(input)
-    if drag.enabled and input.UserInputType == Enum.UserInputType.MouseMovement then
+    if drag.enabled and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - drag.start
         main.Position = UDim2.new(
             drag.startPos.X.Scale,
