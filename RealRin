@@ -9,8 +9,8 @@ gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 
 -- Main Frame
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 200, 0, 200)
-main.Position = UDim2.new(0.5, -100, 0.5, -100)
+main.Size = UDim2.new(0, 200, 0, 250)
+main.Position = UDim2.new(0.5, -100, 0.5, -125)
 main.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
 main.BorderSizePixel = 0
 main.Parent = gui
@@ -22,7 +22,7 @@ stroke.Thickness = 2
 stroke.Transparency = 0.3
 stroke.Parent = main
 
--- Background
+-- Background Frame
 local bg = Instance.new("Frame")
 bg.Size = UDim2.new(1, -10, 1, -40)
 bg.Position = UDim2.new(0, 5, 0, 35)
@@ -74,25 +74,29 @@ exitBtn.TextSize = 14
 exitBtn.Parent = titleBar
 Instance.new("UICorner", exitBtn).CornerRadius = UDim.new(0, 6)
 
--- Content Frame
+-- Content Frame inside bg
 local contentFrame = Instance.new("Frame")
-contentFrame.Size = UDim2.new(1, -10, 1, -40)
-contentFrame.Position = UDim2.new(0, 5, 0, 35)
+contentFrame.Size = UDim2.new(1, -10, 1, -10)
+contentFrame.Position = UDim2.new(0, 5, 0, 5)
 contentFrame.BackgroundTransparency = 1
-contentFrame.Parent = main
+contentFrame.Parent = bg
 
--- Make Toggle Button Function (updated)
-local function makeToggle(text, order)
+-- UIListLayout to automatically arrange elements
+local layout = Instance.new("UIListLayout")
+layout.Parent = contentFrame
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.Padding = UDim.new(0, 10)
+
+-- Make Toggle Button Function
+local function makeToggle(text)
     local base = Instance.new("Frame")
-    base.Size = UDim2.new(0.9, 0, 0, 30)
-    base.Position = UDim2.new(0.5, 0, 0, (order - 1) * 40 + 10) -- Adjusted spacing
-    base.AnchorPoint = Vector2.new(0.5, 0)
+    base.Size = UDim2.new(1, 0, 0, 30)
     base.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
     base.BorderSizePixel = 0
     base.Parent = contentFrame
     Instance.new("UICorner", base).CornerRadius = UDim.new(0, 6)
 
-    -- Line sa gilid
+    -- Line
     local line = Instance.new("Frame")
     line.Size = UDim2.new(0, 2, 1, 0)
     line.Position = UDim2.new(0, 0, 0, 0)
@@ -140,21 +144,19 @@ local function makeToggle(text, order)
 end
 
 -- Create Toggles
-makeToggle("Freeze Trade", 1)
-makeToggle("Auto Accept", 2)
-makeToggle("Auto Add Items", 3)
+makeToggle("Freeze Trade")
+makeToggle("Auto Accept")
+makeToggle("Auto Add Items")
 
--- "Add Best Fruit" Button (moved inside bg)
+-- "Add Best Fruit" Button
 local fruitBtn = Instance.new("TextButton")
-fruitBtn.Size = UDim2.new(0.9, 0, 0, 30)
-fruitBtn.Position = UDim2.new(0.5, 0, 0, 160)
-fruitBtn.AnchorPoint = Vector2.new(0.5, 0)
+fruitBtn.Size = UDim2.new(1, 0, 0, 30)
 fruitBtn.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
 fruitBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
 fruitBtn.Text = "Add Best Fruit"
 fruitBtn.Font = Enum.Font.GothamBold
 fruitBtn.TextSize = 14
-fruitBtn.Parent = bg
+fruitBtn.Parent = contentFrame
 Instance.new("UICorner", fruitBtn).CornerRadius = UDim.new(0, 6)
 
 fruitBtn.MouseButton1Click:Connect(function()
@@ -171,7 +173,6 @@ minimizeBtn.MouseButton1Click:Connect(function()
     TS:Create(main, TweenInfo.new(0.3), {
         Size = minimized and minimizedSize or originalSize
     }):Play()
-    contentFrame.Visible = not minimized
     bg.Visible = not minimized
 end)
 
@@ -187,13 +188,15 @@ end)
 
 -- Drag TitleBar
 local drag = { enabled = false, start = nil, startPos = nil }
+local dragConnection
 
 titleBar.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         drag.enabled = true
         drag.start = input.Position
         drag.startPos = main.Position
-        input.Changed:Connect(function()
+        if dragConnection then dragConnection:Disconnect() end
+        dragConnection = input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
                 drag.enabled = false
             end
