@@ -1,7 +1,3 @@
-local Players = game:GetService("Players")
-local UIS = game:GetService("UserInputService")
-local TS = game:GetService("TweenService")
-
 local gui = Instance.new("ScreenGui")
 gui.ResetOnSpawn = false
 gui.Name = "RinHubUI"
@@ -22,10 +18,10 @@ stroke.Thickness = 2
 stroke.Transparency = 0.3
 stroke.Parent = main
 
--- Background Frame (Updated to fit perfectly inside main)
+-- Background Frame
 local bg = Instance.new("Frame")
-bg.Size = UDim2.new(1, 0, 1, -30)  -- Adjusted size
-bg.Position = UDim2.new(0, 0, 0, 30)  -- Adjusted position to fit below title bar
+bg.Size = UDim2.new(1, -10, 1, -40)
+bg.Position = UDim2.new(0, 5, 0, 35)
 bg.BackgroundColor3 = Color3.fromRGB(9, 255, 182)
 bg.BorderSizePixel = 0
 bg.Parent = main
@@ -163,6 +159,21 @@ fruitBtn.MouseButton1Click:Connect(function()
     print("Best fruit added!")
 end)
 
+-- "Kick Player" Button
+local kickPlayerBtn = Instance.new("TextButton")
+kickPlayerBtn.Size = UDim2.new(1, 0, 0, 30)
+kickPlayerBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Red background
+kickPlayerBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+kickPlayerBtn.Text = "Kick Player"
+kickPlayerBtn.Font = Enum.Font.GothamBold
+kickPlayerBtn.TextSize = 14
+kickPlayerBtn.Parent = contentFrame
+Instance.new("UICorner", kickPlayerBtn).CornerRadius = UDim.new(0, 6)
+
+kickPlayerBtn.MouseButton1Click:Connect(function()
+    print("Player has been kicked!")
+end)
+
 -- Minimize Function
 local minimized = false
 local originalSize = main.Size
@@ -176,14 +187,54 @@ minimizeBtn.MouseButton1Click:Connect(function()
     bg.Visible = not minimized
 end)
 
--- Exit Function
+-- Exit Function with Confirmation
 exitBtn.MouseButton1Click:Connect(function()
-    TS:Create(main, TweenInfo.new(0.2), {
-        Size = UDim2.new(0, 0, 0, 0),
-        Position = UDim2.new(0.5, 0, 0.5, 0)
-    }):Play()
-    task.wait(0.2)
-    gui:Destroy()
+    local confirmExit = Instance.new("Frame")
+    confirmExit.Size = UDim2.new(0, 200, 0, 100)
+    confirmExit.Position = UDim2.new(0.5, -100, 0.5, -50)
+    confirmExit.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    confirmExit.BorderSizePixel = 0
+    confirmExit.Parent = gui
+    Instance.new("UICorner", confirmExit).CornerRadius = UDim.new(0, 10)
+
+    local confirmText = Instance.new("TextLabel")
+    confirmText.Size = UDim2.new(1, 0, 0.6, 0)
+    confirmText.Position = UDim2.new(0, 0, 0, 0)
+    confirmText.BackgroundTransparency = 1
+    confirmText.Text = "Are you sure you want to exit?"
+    confirmText.TextColor3 = Color3.fromRGB(0, 0, 0)
+    confirmText.TextSize = 16
+    confirmText.TextAlignment = Enum.TextXAlignment.Center
+    confirmText.Font = Enum.Font.GothamBold
+    confirmText.Parent = confirmExit
+
+    local yesBtn = Instance.new("TextButton")
+    yesBtn.Size = UDim2.new(0, 80, 0, 30)
+    yesBtn.Position = UDim2.new(0, 20, 0.6, 0)
+    yesBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 127)
+    yesBtn.Text = "Yes"
+    yesBtn.Font = Enum.Font.GothamBold
+    yesBtn.TextSize = 14
+    yesBtn.Parent = confirmExit
+    Instance.new("UICorner", yesBtn).CornerRadius = UDim.new(0, 6)
+
+    local noBtn = Instance.new("TextButton")
+    noBtn.Size = UDim2.new(0, 80, 0, 30)
+    noBtn.Position = UDim2.new(0, 100, 0.6, 0)
+    noBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    noBtn.Text = "No"
+    noBtn.Font = Enum.Font.GothamBold
+    noBtn.TextSize = 14
+    noBtn.Parent = confirmExit
+    Instance.new("UICorner", noBtn).CornerRadius = UDim.new(0, 6)
+
+    yesBtn.MouseButton1Click:Connect(function()
+        gui:Destroy() -- Close the GUI
+    end)
+
+    noBtn.MouseButton1Click:Connect(function()
+        confirmExit:Destroy() -- Remove the confirmation box
+    end)
 end)
 
 -- Drag TitleBar
