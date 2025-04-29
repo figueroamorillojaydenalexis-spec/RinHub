@@ -9,8 +9,8 @@ gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 
 -- Main Frame
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 200, 0, 250)
-main.Position = UDim2.new(0.5, -100, 0.5, -125)
+main.Size = UDim2.new(0, 200, 0, 200)
+main.Position = UDim2.new(0.5, -100, 0.5, -100)
 main.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
 main.BorderSizePixel = 0
 main.Parent = gui
@@ -22,7 +22,7 @@ stroke.Thickness = 2
 stroke.Transparency = 0.3
 stroke.Parent = main
 
--- Background Frame
+-- Background
 local bg = Instance.new("Frame")
 bg.Size = UDim2.new(1, -10, 1, -40)
 bg.Position = UDim2.new(0, 5, 0, 35)
@@ -74,42 +74,30 @@ exitBtn.TextSize = 14
 exitBtn.Parent = titleBar
 Instance.new("UICorner", exitBtn).CornerRadius = UDim.new(0, 6)
 
--- Content Frame inside bg
+-- Content Frame
 local contentFrame = Instance.new("Frame")
-contentFrame.Size = UDim2.new(1, -10, 1, -10)
-contentFrame.Position = UDim2.new(0, 5, 0, 5)
+contentFrame.Size = UDim2.new(1, -10, 1, -40)
+contentFrame.Position = UDim2.new(0, 5, 0, 35)
 contentFrame.BackgroundTransparency = 1
-contentFrame.Parent = bg
+contentFrame.Parent = main
 
--- UIListLayout to automatically arrange elements
-local layout = Instance.new("UIListLayout")
-layout.Parent = contentFrame
-layout.SortOrder = Enum.SortOrder.LayoutOrder
-layout.Padding = UDim.new(0, 10)
-
--- Make Toggle Button Function
-local function makeToggle(text)
+-- Make Toggle Button Function (fixed)
+local function makeToggle(text, order)
     local base = Instance.new("Frame")
-    base.Size = UDim2.new(1, 0, 0, 30)
-    base.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
+    base.Size = UDim2.new(0.9, 0, 0, 30)
+    base.Position = UDim2.new(0.5, 0, 0, (order - 1) * 40)
+    base.AnchorPoint = Vector2.new(0.5, 0)
+    base.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Black background
     base.BorderSizePixel = 0
     base.Parent = contentFrame
     Instance.new("UICorner", base).CornerRadius = UDim.new(0, 6)
-
-    -- Line
-    local line = Instance.new("Frame")
-    line.Size = UDim2.new(0, 2, 1, 0)
-    line.Position = UDim2.new(0, 0, 0, 0)
-    line.BackgroundColor3 = Color3.fromRGB(0, 200, 150)
-    line.BorderSizePixel = 0
-    line.Parent = base
 
     local txt = Instance.new("TextLabel")
     txt.Size = UDim2.new(1, -60, 1, 0)
     txt.Position = UDim2.new(0, 10, 0, 0)
     txt.BackgroundTransparency = 1
     txt.Text = text
-    txt.TextColor3 = Color3.fromRGB(0, 0, 0)
+    txt.TextColor3 = Color3.fromRGB(255, 255, 255)
     txt.TextSize = 14
     txt.Font = Enum.Font.Gotham
     txt.TextXAlignment = Enum.TextXAlignment.Left
@@ -119,7 +107,7 @@ local function makeToggle(text)
     btn.Size = UDim2.new(0, 40, 0, 20)
     btn.Position = UDim2.new(1, -10, 0.5, 0)
     btn.AnchorPoint = Vector2.new(1, 0.5)
-    btn.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
+    btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     btn.Text = ""
     btn.Parent = base
     Instance.new("UICorner", btn).CornerRadius = UDim.new(1, 0)
@@ -135,7 +123,7 @@ local function makeToggle(text)
     btn.MouseButton1Click:Connect(function()
         on = not on
         TS:Create(btn, TweenInfo.new(0.2), {
-            BackgroundColor3 = on and Color3.fromRGB(0, 255, 127) or Color3.fromRGB(3, 244, 202)
+            BackgroundColor3 = on and Color3.fromRGB(0, 255, 127) or Color3.fromRGB(0, 0, 0)
         }):Play()
         TS:Create(dot, TweenInfo.new(0.2), {
             Position = on and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
@@ -144,13 +132,15 @@ local function makeToggle(text)
 end
 
 -- Create Toggles
-makeToggle("Freeze Trade")
-makeToggle("Auto Accept")
-makeToggle("Auto Add Items")
+makeToggle("Freeze Trade", 1)
+makeToggle("Auto Accept", 2)
+makeToggle("Auto Add Items", 3)
 
 -- "Add Best Fruit" Button
 local fruitBtn = Instance.new("TextButton")
-fruitBtn.Size = UDim2.new(1, 0, 0, 30)
+fruitBtn.Size = UDim2.new(0.9, 0, 0, 30)
+fruitBtn.Position = UDim2.new(0.5, 0, 0, 160)
+fruitBtn.AnchorPoint = Vector2.new(0.5, 0)
 fruitBtn.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
 fruitBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
 fruitBtn.Text = "Add Best Fruit"
@@ -163,21 +153,6 @@ fruitBtn.MouseButton1Click:Connect(function()
     print("Best fruit added!")
 end)
 
--- Kick Player Button (Red Background)
-local kickBtn = Instance.new("TextButton")
-kickBtn.Size = UDim2.new(1, 0, 0, 30)
-kickBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-kickBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-kickBtn.Text = "Kick Player"
-kickBtn.Font = Enum.Font.GothamBold
-kickBtn.TextSize = 14
-kickBtn.Parent = contentFrame
-Instance.new("UICorner", kickBtn).CornerRadius = UDim.new(0, 6)
-
-kickBtn.MouseButton1Click:Connect(function()
-    print("Player has been kicked!")  -- Placeholder action
-end)
-
 -- Minimize Function
 local minimized = false
 local originalSize = main.Size
@@ -188,80 +163,29 @@ minimizeBtn.MouseButton1Click:Connect(function()
     TS:Create(main, TweenInfo.new(0.3), {
         Size = minimized and minimizedSize or originalSize
     }):Play()
+    contentFrame.Visible = not minimized
     bg.Visible = not minimized
 end)
 
--- Exit Function with Confirmation
+-- Exit Function
 exitBtn.MouseButton1Click:Connect(function()
-    local confirmExit = Instance.new("ScreenGui")
-    confirmExit.Name = "ConfirmExit"
-    confirmExit.Parent = gui
-
-    local exitFrame = Instance.new("Frame")
-    exitFrame.Size = UDim2.new(0, 200, 0, 100)
-    exitFrame.Position = UDim2.new(0.5, -100, 0.5, -50)
-    exitFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    exitFrame.BorderSizePixel = 0
-    exitFrame.Parent = confirmExit
-    Instance.new("UICorner", exitFrame).CornerRadius = UDim.new(0, 10)
-
-    local exitText = Instance.new("TextLabel")
-    exitText.Size = UDim2.new(1, 0, 0.6, 0)
-    exitText.Position = UDim2.new(0, 0, 0, 0)
-    exitText.BackgroundTransparency = 1
-    exitText.Text = "Are you sure you want to exit?"
-    exitText.TextColor3 = Color3.fromRGB(0, 0, 0)
-    exitText.TextSize = 16
-    exitText.Font = Enum.Font.GothamBold
-    exitText.TextAlignment = Enum.TextAlignment.Center
-    exitText.Parent = exitFrame
-
-    local yesBtn = Instance.new("TextButton")
-    yesBtn.Size = UDim2.new(0, 80, 0, 30)
-    yesBtn.Position = UDim2.new(0, 20, 0, 60)
-    yesBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-    yesBtn.Text = "Yes"
-    yesBtn.Font = Enum.Font.GothamBold
-    yesBtn.TextSize = 14
-    yesBtn.Parent = exitFrame
-    Instance.new("UICorner", yesBtn).CornerRadius = UDim.new(0, 6)
-
-    local noBtn = Instance.new("TextButton")
-    noBtn.Size = UDim2.new(0, 80, 0, 30)
-    noBtn.Position = UDim2.new(1, -100, 0, 60)
-    noBtn.AnchorPoint = Vector2.new(1, 0)
-    noBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    noBtn.Text = "No"
-    noBtn.Font = Enum.Font.GothamBold
-    noBtn.TextSize = 14
-    noBtn.Parent = exitFrame
-    Instance.new("UICorner", noBtn).CornerRadius = UDim.new(0, 6)
-
-    yesBtn.MouseButton1Click:Connect(function()
-        TS:Create(main, TweenInfo.new(0.2), {
-            Size = UDim2.new(0, 0, 0, 0),
-            Position = UDim2.new(0.5, 0, 0.5, 0)
-        }):Play()
-        task.wait(0.2)
-        gui:Destroy()
-    end)
-
-    noBtn.MouseButton1Click:Connect(function()
-        confirmExit:Destroy()
-    end)
+    TS:Create(main, TweenInfo.new(0.2), {
+        Size = UDim2.new(0, 0, 0, 0),
+        Position = UDim2.new(0.5, 0, 0.5, 0)
+    }):Play()
+    task.wait(0.2)
+    gui:Destroy()
 end)
 
 -- Drag TitleBar
 local drag = { enabled = false, start = nil, startPos = nil }
-local dragConnection
 
 titleBar.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         drag.enabled = true
         drag.start = input.Position
         drag.startPos = main.Position
-        if dragConnection then dragConnection:Disconnect() end
-        dragConnection = input.Changed:Connect(function()
+        input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
                 drag.enabled = false
             end
