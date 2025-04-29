@@ -10,13 +10,13 @@ gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 local main = Instance.new("Frame")
 main.Size = UDim2.new(0, 200, 0, 200)
 main.Position = UDim2.new(0.5, -100, 0.5, -100)
-main.BackgroundColor3 = Color3.fromRGB(40, 0, 0)  -- Dark red base color
+main.BackgroundColor3 = Color3.fromRGB(40, 0, 0)  -- Dark Red Frame
 main.BorderSizePixel = 0
 main.Parent = gui
 Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
 
 local stroke = Instance.new("UIStroke")
-stroke.Color = Color3.fromRGB(120, 0, 0)  -- Dark red stroke
+stroke.Color = Color3.fromRGB(120, 0, 0)  -- Dark Red Stroke
 stroke.Thickness = 2
 stroke.Transparency = 0.3
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
@@ -24,8 +24,8 @@ stroke.Parent = main
 
 local bg = Instance.new("UIGradient")
 bg.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 0, 0)),  -- Dark red gradient start
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 0, 0))   -- Darker red gradient end
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 0, 0)),  -- Dark Red Gradient
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 0, 0))
 })
 bg.Parent = main
 
@@ -34,25 +34,60 @@ shadow.Size = UDim2.new(1, 30, 1, 30)
 shadow.Position = UDim2.new(0, -15, 0, -15)
 shadow.BackgroundTransparency = 1
 shadow.Image = "rbxassetid://297774371"
-shadow.ImageColor3 = Color3.fromRGB(120, 0, 0)  -- Dark red shadow
+shadow.ImageColor3 = Color3.fromRGB(120, 0, 0)  -- Dark Red Shadow
 shadow.ImageTransparency = 0.6
 shadow.Parent = main
 
-local label = Instance.new("TextLabel")
-label.Size = UDim2.new(1, 0, 0, 30)
-label.BackgroundTransparency = 1
-label.Text = "Rin Hub"
-label.TextColor3 = Color3.fromRGB(255, 255, 255)
-label.TextStrokeTransparency = 0.7
-label.TextSize = 16
-label.Font = Enum.Font.GothamBold
-label.Parent = main
+-- Title Bar with Minimize & Exit Buttons
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 30)
+titleBar.BackgroundTransparency = 1
+titleBar.Parent = main
 
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -60, 1, 0)
+title.Position = UDim2.new(0, 10, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "Rin Hub"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextStrokeTransparency = 0.7
+title.TextSize = 16
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = titleBar
+
+-- Minimize Button
+local minimizeBtn = Instance.new("TextButton")
+minimizeBtn.Size = UDim2.new(0, 25, 0, 25)
+minimizeBtn.Position = UDim2.new(1, -55, 0.5, -12)
+minimizeBtn.AnchorPoint = Vector2.new(1, 0.5)
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimizeBtn.Text = "_"
+minimizeBtn.Font = Enum.Font.GothamBold
+minimizeBtn.TextSize = 18
+minimizeBtn.Parent = titleBar
+Instance.new("UICorner", minimizeBtn).CornerRadius = UDim.new(0, 6)
+
+-- Exit Button
+local exitBtn = Instance.new("TextButton")
+exitBtn.Size = UDim2.new(0, 25, 0, 25)
+exitBtn.Position = UDim2.new(1, -25, 0.5, -12)
+exitBtn.AnchorPoint = Vector2.new(1, 0.5)
+exitBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
+exitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+exitBtn.Text = "X"
+exitBtn.Font = Enum.Font.GothamBold
+exitBtn.TextSize = 14
+exitBtn.Parent = titleBar
+Instance.new("UICorner", exitBtn).CornerRadius = UDim.new(0, 6)
+
+-- Toggle Function (Kept Original Green Colors)
 local function makeToggle(text, yPos)
     local base = Instance.new("Frame")
     base.Size = UDim2.new(0.9, 0, 0, 30)
     base.Position = UDim2.new(0.5, 0, 0, yPos)
-    base.BackgroundColor3 = Color3.fromRGB(40, 0, 0)  -- Dark red toggle base
+    base.BackgroundColor3 = Color3.fromRGB(0, 100, 0)  -- Green Toggle Base
     base.BorderSizePixel = 0
     base.AnchorPoint = Vector2.new(0.5, 0)
     base.Parent = main
@@ -61,7 +96,7 @@ local function makeToggle(text, yPos)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 40, 0, 20)
     btn.Position = UDim2.new(1, -45, 0.5, -10)
-    btn.BackgroundColor3 = Color3.fromRGB(20, 0, 0)  -- Darker red when OFF
+    btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Black when OFF
     btn.BorderSizePixel = 0
     btn.Text = ""
     btn.Parent = base
@@ -90,7 +125,7 @@ local function makeToggle(text, yPos)
     btn.MouseButton1Click:Connect(function()
         on = not on
         local goals = {
-            [btn] = {BackgroundColor3 = on and Color3.fromRGB(180, 0, 0) or Color3.fromRGB(20, 0, 0)},  -- Bright red when ON
+            [btn] = {BackgroundColor3 = on and Color3.fromRGB(0, 255, 127) or Color3.fromRGB(0, 0, 0)},
             [dot] = {Position = on and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)}
         }
         for obj, goal in pairs(goals) do
@@ -104,13 +139,13 @@ makeToggle("Freeze Trade", 40)
 makeToggle("Auto Accept", 80)
 makeToggle("Auto Add Items", 120)
 
--- Add "Add Best Fruit" button
+-- Add Best Fruit Button (Red to Match Frame)
 local fruitBtn = Instance.new("TextButton")
 fruitBtn.Size = UDim2.new(0.9, 0, 0, 30)
 fruitBtn.Position = UDim2.new(0.5, 0, 0, 160)
 fruitBtn.AnchorPoint = Vector2.new(0.5, 0)
-fruitBtn.BackgroundColor3 = Color3.fromRGB(20, 0, 0)  -- Dark red button
-fruitBtn.TextColor3 = Color3.fromRGB(255, 100, 100)  -- Light red text
+fruitBtn.BackgroundColor3 = Color3.fromRGB(80, 0, 0)  -- Dark Red
+fruitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 fruitBtn.Text = "Add Best Fruit"
 fruitBtn.Font = Enum.Font.GothamBold
 fruitBtn.TextSize = 14
@@ -121,10 +156,32 @@ fruitBtn.MouseButton1Click:Connect(function()
     print("Best fruit added!")
 end)
 
--- Drag logic
+-- Minimize Function
+local minimized = false
+local originalSize = main.Size
+local minimizedSize = UDim2.new(0, 200, 0, 30)  -- Only shows title bar
+
+minimizeBtn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    TS:Create(main, TweenInfo.new(0.3), {
+        Size = minimized and minimizedSize or originalSize
+    }):Play()
+end)
+
+-- Exit Function
+exitBtn.MouseButton1Click:Connect(function()
+    TS:Create(main, TweenInfo.new(0.2), {
+        Size = UDim2.new(0, 0, 0, 0),
+        Position = UDim2.new(0.5, 0, 0.5, 0)
+    }):Play()
+    task.wait(0.2)
+    gui:Destroy()
+end)
+
+-- Drag Logic (Now only works on title bar)
 local drag = { enabled = false, start = nil, startPos = nil }
 
-main.InputBegan:Connect(function(input)
+titleBar.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         drag.enabled = true
         drag.start = input.Position
