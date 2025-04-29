@@ -81,13 +81,13 @@ contentFrame.Position = UDim2.new(0, 5, 0, 35)
 contentFrame.BackgroundTransparency = 1
 contentFrame.Parent = main
 
--- Make Toggle Button Function (fixed)
+-- Make Toggle Button Function (updated)
 local function makeToggle(text, order)
     local base = Instance.new("Frame")
     base.Size = UDim2.new(0.9, 0, 0, 30)
     base.Position = UDim2.new(0.5, 0, 0, (order - 1) * 40)
     base.AnchorPoint = Vector2.new(0.5, 0)
-    base.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Black background
+    base.BackgroundColor3 = Color3.fromRGB(3, 244, 202) -- Matching the frame color
     base.BorderSizePixel = 0
     base.Parent = contentFrame
     Instance.new("UICorner", base).CornerRadius = UDim.new(0, 6)
@@ -97,7 +97,7 @@ local function makeToggle(text, order)
     txt.Position = UDim2.new(0, 10, 0, 0)
     txt.BackgroundTransparency = 1
     txt.Text = text
-    txt.TextColor3 = Color3.fromRGB(255, 255, 255)
+    txt.TextColor3 = Color3.fromRGB(0, 0, 0)  -- Black text
     txt.TextSize = 14
     txt.Font = Enum.Font.Gotham
     txt.TextXAlignment = Enum.TextXAlignment.Left
@@ -107,7 +107,7 @@ local function makeToggle(text, order)
     btn.Size = UDim2.new(0, 40, 0, 20)
     btn.Position = UDim2.new(1, -10, 0.5, 0)
     btn.AnchorPoint = Vector2.new(1, 0.5)
-    btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(3, 244, 202) -- Matching the frame color
     btn.Text = ""
     btn.Parent = base
     Instance.new("UICorner", btn).CornerRadius = UDim.new(1, 0)
@@ -123,7 +123,7 @@ local function makeToggle(text, order)
     btn.MouseButton1Click:Connect(function()
         on = not on
         TS:Create(btn, TweenInfo.new(0.2), {
-            BackgroundColor3 = on and Color3.fromRGB(0, 255, 127) or Color3.fromRGB(0, 0, 0)
+            BackgroundColor3 = on and Color3.fromRGB(0, 255, 127) or Color3.fromRGB(3, 244, 202)
         }):Play()
         TS:Create(dot, TweenInfo.new(0.2), {
             Position = on and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
@@ -131,7 +131,7 @@ local function makeToggle(text, order)
     end)
 end
 
--- Create Toggles
+-- Create Toggles (adjusted positions)
 makeToggle("Freeze Trade", 1)
 makeToggle("Auto Accept", 2)
 makeToggle("Auto Add Items", 3)
