@@ -85,19 +85,27 @@ contentFrame.Parent = main
 local function makeToggle(text, order)
     local base = Instance.new("Frame")
     base.Size = UDim2.new(0.9, 0, 0, 30)
-    base.Position = UDim2.new(0.5, 0, 0, (order - 1) * 40)
+    base.Position = UDim2.new(0.5, 0, 0, (order - 1) * 40 + 10) -- Adjusted spacing
     base.AnchorPoint = Vector2.new(0.5, 0)
-    base.BackgroundColor3 = Color3.fromRGB(3, 244, 202) -- Matching the frame color
+    base.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
     base.BorderSizePixel = 0
     base.Parent = contentFrame
     Instance.new("UICorner", base).CornerRadius = UDim.new(0, 6)
+
+    -- Line sa gilid
+    local line = Instance.new("Frame")
+    line.Size = UDim2.new(0, 2, 1, 0)
+    line.Position = UDim2.new(0, 0, 0, 0)
+    line.BackgroundColor3 = Color3.fromRGB(0, 200, 150)
+    line.BorderSizePixel = 0
+    line.Parent = base
 
     local txt = Instance.new("TextLabel")
     txt.Size = UDim2.new(1, -60, 1, 0)
     txt.Position = UDim2.new(0, 10, 0, 0)
     txt.BackgroundTransparency = 1
     txt.Text = text
-    txt.TextColor3 = Color3.fromRGB(0, 0, 0)  -- Black text
+    txt.TextColor3 = Color3.fromRGB(0, 0, 0)
     txt.TextSize = 14
     txt.Font = Enum.Font.Gotham
     txt.TextXAlignment = Enum.TextXAlignment.Left
@@ -107,7 +115,7 @@ local function makeToggle(text, order)
     btn.Size = UDim2.new(0, 40, 0, 20)
     btn.Position = UDim2.new(1, -10, 0.5, 0)
     btn.AnchorPoint = Vector2.new(1, 0.5)
-    btn.BackgroundColor3 = Color3.fromRGB(3, 244, 202) -- Matching the frame color
+    btn.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
     btn.Text = ""
     btn.Parent = base
     Instance.new("UICorner", btn).CornerRadius = UDim.new(1, 0)
@@ -131,12 +139,12 @@ local function makeToggle(text, order)
     end)
 end
 
--- Create Toggles (adjusted positions)
+-- Create Toggles
 makeToggle("Freeze Trade", 1)
 makeToggle("Auto Accept", 2)
 makeToggle("Auto Add Items", 3)
 
--- "Add Best Fruit" Button
+-- "Add Best Fruit" Button (moved inside bg)
 local fruitBtn = Instance.new("TextButton")
 fruitBtn.Size = UDim2.new(0.9, 0, 0, 30)
 fruitBtn.Position = UDim2.new(0.5, 0, 0, 160)
@@ -146,7 +154,7 @@ fruitBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
 fruitBtn.Text = "Add Best Fruit"
 fruitBtn.Font = Enum.Font.GothamBold
 fruitBtn.TextSize = 14
-fruitBtn.Parent = contentFrame
+fruitBtn.Parent = bg
 Instance.new("UICorner", fruitBtn).CornerRadius = UDim.new(0, 6)
 
 fruitBtn.MouseButton1Click:Connect(function()
