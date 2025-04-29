@@ -2,47 +2,37 @@ local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local TS = game:GetService("TweenService")
 
--- GUI Setup
 local gui = Instance.new("ScreenGui")
 gui.ResetOnSpawn = false
 gui.Name = "RinHubUI"
 gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 
--- Main Frame (DARK RED)
+-- Main Frame (rgba(3,244,202,255))
 local main = Instance.new("Frame")
 main.Size = UDim2.new(0, 200, 0, 200)
 main.Position = UDim2.new(0.5, -100, 0.5, -100)
-main.BackgroundColor3 = Color3.fromRGB(40, 0, 0) -- Dark Red
+main.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
 main.BorderSizePixel = 0
 main.Parent = gui
 Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
 
--- Stroke (DARK RED)
+-- Stroke (rgba(9,255,182,255))
 local stroke = Instance.new("UIStroke")
-stroke.Color = Color3.fromRGB(120, 0, 0)
+stroke.Color = Color3.fromRGB(9, 255, 182)
 stroke.Thickness = 2
 stroke.Transparency = 0.3
 stroke.Parent = main
 
--- Gradient (DARK RED)
-local bg = Instance.new("UIGradient")
-bg.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 0, 0)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 0, 0))
-})
+-- Background (rgba(9,255,182,255))
+local bg = Instance.new("Frame")
+bg.Size = UDim2.new(1, -10, 1, -40)
+bg.Position = UDim2.new(0, 5, 0, 35)
+bg.BackgroundColor3 = Color3.fromRGB(9, 255, 182)
+bg.BorderSizePixel = 0
 bg.Parent = main
+Instance.new("UICorner", bg).CornerRadius = UDim.new(0, 6)
 
--- Shadow (DARK RED)
-local shadow = Instance.new("ImageLabel")
-shadow.Size = UDim2.new(1, 30, 1, 30)
-shadow.Position = UDim2.new(0, -15, 0, -15)
-shadow.BackgroundTransparency = 1
-shadow.Image = "rbxassetid://297774371"
-shadow.ImageColor3 = Color3.fromRGB(120, 0, 0)
-shadow.ImageTransparency = 0.6
-shadow.Parent = main
-
--- Title Bar (With Minimize & Exit)
+-- Title Bar
 local titleBar = Instance.new("Frame")
 titleBar.Size = UDim2.new(1, 0, 0, 30)
 titleBar.BackgroundTransparency = 1
@@ -53,39 +43,46 @@ title.Size = UDim2.new(1, -60, 1, 0)
 title.Position = UDim2.new(0, 10, 0, 0)
 title.BackgroundTransparency = 1
 title.Text = "Rin Hub"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextColor3 = Color3.fromRGB(0, 0, 0)
 title.TextSize = 16
 title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = titleBar
 
--- MINIMIZE BUTTON (Top-Right)
+-- MINIMIZE BUTTON
 local minimizeBtn = Instance.new("TextButton")
 minimizeBtn.Size = UDim2.new(0, 25, 0, 25)
 minimizeBtn.Position = UDim2.new(1, -55, 0, 2)
 minimizeBtn.AnchorPoint = Vector2.new(1, 0)
-minimizeBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
-minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
+minimizeBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
 minimizeBtn.Text = "_"
 minimizeBtn.Font = Enum.Font.GothamBold
 minimizeBtn.TextSize = 18
 minimizeBtn.Parent = titleBar
 Instance.new("UICorner", minimizeBtn).CornerRadius = UDim.new(0, 6)
 
--- EXIT BUTTON (Top-Right)
+-- EXIT BUTTON
 local exitBtn = Instance.new("TextButton")
 exitBtn.Size = UDim2.new(0, 25, 0, 25)
 exitBtn.Position = UDim2.new(1, -25, 0, 2)
 exitBtn.AnchorPoint = Vector2.new(1, 0)
-exitBtn.BackgroundColor3 = Color3.fromRGB(180, 0, 0)
-exitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+exitBtn.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
+exitBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
 exitBtn.Text = "X"
 exitBtn.Font = Enum.Font.GothamBold
 exitBtn.TextSize = 14
 exitBtn.Parent = titleBar
 Instance.new("UICorner", exitBtn).CornerRadius = UDim.new(0, 6)
 
--- TOGGLE BUTTONS (GREEN - ORIGINAL STYLE)
+-- Content Frame (to group all toggles for proper minimizing)
+local contentFrame = Instance.new("Frame")
+contentFrame.Size = UDim2.new(1, -10, 1, -40)
+contentFrame.Position = UDim2.new(0, 5, 0, 35)
+contentFrame.BackgroundTransparency = 1
+contentFrame.Parent = main
+
+-- TOGGLE BUTTONS (GREEN)
 local function makeToggle(text, yPos)
     local base = Instance.new("Frame")
     base.Size = UDim2.new(0.9, 0, 0, 30)
@@ -93,7 +90,7 @@ local function makeToggle(text, yPos)
     base.BackgroundColor3 = Color3.fromRGB(0, 100, 0) -- Green Base
     base.BorderSizePixel = 0
     base.AnchorPoint = Vector2.new(0.5, 0)
-    base.Parent = main
+    base.Parent = contentFrame
     Instance.new("UICorner", base).CornerRadius = UDim.new(0, 6)
 
     local btn = Instance.new("TextButton")
@@ -139,24 +136,24 @@ makeToggle("Freeze Trade", 40)
 makeToggle("Auto Accept", 80)
 makeToggle("Auto Add Items", 120)
 
--- "Add Best Fruit" Button (DARK RED)
+-- "Add Best Fruit" Button
 local fruitBtn = Instance.new("TextButton")
 fruitBtn.Size = UDim2.new(0.9, 0, 0, 30)
 fruitBtn.Position = UDim2.new(0.5, 0, 0, 160)
 fruitBtn.AnchorPoint = Vector2.new(0.5, 0)
-fruitBtn.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
-fruitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+fruitBtn.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
+fruitBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
 fruitBtn.Text = "Add Best Fruit"
 fruitBtn.Font = Enum.Font.GothamBold
 fruitBtn.TextSize = 14
-fruitBtn.Parent = main
+fruitBtn.Parent = contentFrame
 Instance.new("UICorner", fruitBtn).CornerRadius = UDim.new(0, 6)
 
 fruitBtn.MouseButton1Click:Connect(function()
     print("Best fruit added!")
 end)
 
--- MINIMIZE FUNCTION
+-- MINIMIZE FUNCTION (Now properly hides content)
 local minimized = false
 local originalSize = main.Size
 local minimizedSize = UDim2.new(0, 200, 0, 30)
@@ -166,6 +163,8 @@ minimizeBtn.MouseButton1Click:Connect(function()
     TS:Create(main, TweenInfo.new(0.3), {
         Size = minimized and minimizedSize or originalSize
     }):Play()
+    contentFrame.Visible = not minimized
+    bg.Visible = not minimized
 end)
 
 -- EXIT FUNCTION
