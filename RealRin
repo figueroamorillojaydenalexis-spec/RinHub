@@ -1,15 +1,16 @@
+-- Services
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local TS = game:GetService("TweenService")
 
+-- GUI Setup
 local gui = Instance.new("ScreenGui")
 gui.ResetOnSpawn = false
 gui.Name = "RinHubUI"
 gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 
--- Main Frame
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 200, 0, 230) -- Adjusted height for "Add Best Fruit"
+main.Size = UDim2.new(0, 200, 0, 230)
 main.Position = UDim2.new(0.5, -100, 0.5, -115)
 main.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
 main.BorderSizePixel = 0
@@ -25,7 +26,6 @@ stroke.Thickness = 2
 stroke.Transparency = 0.3
 stroke.Parent = main
 
--- Background
 local bg = Instance.new("Frame")
 bg.Size = UDim2.new(1, -10, 1, -40)
 bg.Position = UDim2.new(0, 5, 0, 35)
@@ -37,7 +37,6 @@ local bgCorner = Instance.new("UICorner")
 bgCorner.CornerRadius = UDim.new(0, 6)
 bgCorner.Parent = bg
 
--- Title Bar
 local titleBar = Instance.new("Frame")
 titleBar.Size = UDim2.new(1, 0, 0, 30)
 titleBar.BackgroundTransparency = 1
@@ -54,7 +53,6 @@ title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = titleBar
 
--- Minimize Button
 local minimizeBtn = Instance.new("TextButton")
 minimizeBtn.Size = UDim2.new(0, 25, 0, 25)
 minimizeBtn.Position = UDim2.new(1, -55, 0, 2)
@@ -70,7 +68,6 @@ local minCorner = Instance.new("UICorner")
 minCorner.CornerRadius = UDim.new(0, 6)
 minCorner.Parent = minimizeBtn
 
--- Exit Button
 local exitBtn = Instance.new("TextButton")
 exitBtn.Size = UDim2.new(0, 25, 0, 25)
 exitBtn.Position = UDim2.new(1, -25, 0, 2)
@@ -86,32 +83,25 @@ local exitCorner = Instance.new("UICorner")
 exitCorner.CornerRadius = UDim.new(0, 6)
 exitCorner.Parent = exitBtn
 
--- Content Frame
 local contentFrame = Instance.new("Frame")
 contentFrame.Size = UDim2.new(1, -10, 1, -45)
 contentFrame.Position = UDim2.new(0, 5, 0, 35)
 contentFrame.BackgroundTransparency = 1
 contentFrame.Parent = main
 
--- Update contentFrame size dynamically
 local function updateContentFrameSize()
-    local contentHeight = 35  -- Starting height for title bar
-
-    -- Add the height of each toggle button and the "Add Best Fruit" button
-    contentHeight = contentHeight + 30 * 3 + 30  -- 3 toggles + 1 fruit button
-    
-    -- Update content frame size based on calculated height
+    local contentHeight = 35
+    contentHeight = contentHeight + 30 * 3 + 30
     contentFrame.Size = UDim2.new(1, -10, 0, contentHeight - 45)
-    main.Size = UDim2.new(0, 200, 0, contentHeight + 35)  -- Adjust main frame height accordingly
+    main.Size = UDim2.new(0, 200, 0, contentHeight + 35)
 end
 
--- Make Toggle Button Function (fixed)
 local function makeToggle(text, order)
     local base = Instance.new("Frame")
     base.Size = UDim2.new(0.9, 0, 0, 30)
     base.Position = UDim2.new(0.5, 0, 0, (order - 1) * 40)
     base.AnchorPoint = Vector2.new(0.5, 0)
-    base.BackgroundColor3 = Color3.fromRGB(3, 244, 202) -- Teal background
+    base.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
     base.BorderSizePixel = 0
     base.Parent = contentFrame
 
@@ -124,7 +114,7 @@ local function makeToggle(text, order)
     txt.Position = UDim2.new(0, 10, 0, 0)
     txt.BackgroundTransparency = 1
     txt.Text = text
-    txt.TextColor3 = Color3.fromRGB(0, 0, 0) -- Black text
+    txt.TextColor3 = Color3.fromRGB(0, 0, 0)
     txt.TextSize = 14
     txt.Font = Enum.Font.Gotham
     txt.TextXAlignment = Enum.TextXAlignment.Left
@@ -164,13 +154,11 @@ local function makeToggle(text, order)
     end)
 end
 
--- Create Toggles
 makeToggle("Freeze Trade", 1)
 makeToggle("Auto Accept", 2)
 makeToggle("Auto Add Items", 3)
 updateContentFrameSize()
 
--- "Add Best Fruit" Button (fixed)
 local fruitBtn = Instance.new("TextButton")
 fruitBtn.Size = UDim2.new(0.9, 0, 0, 30)
 fruitBtn.Position = UDim2.new(0.5, 0, 0, 120)
@@ -190,7 +178,6 @@ fruitBtn.MouseButton1Click:Connect(function()
     print("Best fruit added!")
 end)
 
--- Minimize Function
 local minimized = false
 local originalSize = main.Size
 local minimizedSize = UDim2.new(0, 200, 0, 30)
@@ -204,7 +191,6 @@ minimizeBtn.MouseButton1Click:Connect(function()
     bg.Visible = not minimized
 end)
 
--- Exit Function
 exitBtn.MouseButton1Click:Connect(function()
     TS:Create(main, TweenInfo.new(0.2), {
         Size = UDim2.new(0, 0, 0, 0),
@@ -214,24 +200,19 @@ exitBtn.MouseButton1Click:Connect(function()
     gui:Destroy()
 end)
 
--- Drag TitleBar
+-- Mobile and PC dragging
 local drag = { enabled = false, start = nil, startPos = nil }
 
 titleBar.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         drag.enabled = true
         drag.start = input.Position
         drag.startPos = main.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                drag.enabled = false
-            end
-        end)
     end
 end)
 
 UIS.InputChanged:Connect(function(input)
-    if drag.enabled and input.UserInputType == Enum.UserInputType.MouseMovement then
+    if drag.enabled and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - drag.start
         main.Position = UDim2.new(
             drag.startPos.X.Scale,
@@ -239,5 +220,11 @@ UIS.InputChanged:Connect(function(input)
             drag.startPos.Y.Scale,
             drag.startPos.Y.Offset + delta.Y
         )
+    end
+end)
+
+UIS.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        drag.enabled = false
     end
 end)
