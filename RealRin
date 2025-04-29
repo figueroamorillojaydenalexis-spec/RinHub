@@ -7,7 +7,7 @@ gui.ResetOnSpawn = false
 gui.Name = "RinHubUI"
 gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 
--- Main Frame (rgba(3,244,202,255))
+-- Main Frame
 local main = Instance.new("Frame")
 main.Size = UDim2.new(0, 200, 0, 200)
 main.Position = UDim2.new(0.5, -100, 0.5, -100)
@@ -16,14 +16,14 @@ main.BorderSizePixel = 0
 main.Parent = gui
 Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
 
--- Stroke (rgba(9,255,182,255))
+-- Stroke
 local stroke = Instance.new("UIStroke")
 stroke.Color = Color3.fromRGB(9, 255, 182)
 stroke.Thickness = 2
 stroke.Transparency = 0.3
 stroke.Parent = main
 
--- Background (rgba(9,255,182,255))
+-- Background (For effect under contentFrame)
 local bg = Instance.new("Frame")
 bg.Size = UDim2.new(1, -10, 1, -40)
 bg.Position = UDim2.new(0, 5, 0, 35)
@@ -49,7 +49,7 @@ title.Font = Enum.Font.GothamBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = titleBar
 
--- MINIMIZE BUTTON
+-- Minimize Button
 local minimizeBtn = Instance.new("TextButton")
 minimizeBtn.Size = UDim2.new(0, 25, 0, 25)
 minimizeBtn.Position = UDim2.new(1, -55, 0, 2)
@@ -62,7 +62,7 @@ minimizeBtn.TextSize = 18
 minimizeBtn.Parent = titleBar
 Instance.new("UICorner", minimizeBtn).CornerRadius = UDim.new(0, 6)
 
--- EXIT BUTTON
+-- Exit Button
 local exitBtn = Instance.new("TextButton")
 exitBtn.Size = UDim2.new(0, 25, 0, 25)
 exitBtn.Position = UDim2.new(1, -25, 0, 2)
@@ -75,28 +75,34 @@ exitBtn.TextSize = 14
 exitBtn.Parent = titleBar
 Instance.new("UICorner", exitBtn).CornerRadius = UDim.new(0, 6)
 
--- Content Frame (to group all toggles for proper minimizing)
+-- Content Frame (all toggles inside here)
 local contentFrame = Instance.new("Frame")
 contentFrame.Size = UDim2.new(1, -10, 1, -40)
 contentFrame.Position = UDim2.new(0, 5, 0, 35)
 contentFrame.BackgroundTransparency = 1
 contentFrame.Parent = main
 
--- TOGGLE BUTTONS (GREEN)
-local function makeToggle(text, yPos)
+-- Auto layout the toggles
+local layout = Instance.new("UIListLayout")
+layout.Padding = UDim.new(0, 10)
+layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.Parent = contentFrame
+
+-- Function to create toggles
+local function makeToggle(text)
     local base = Instance.new("Frame")
     base.Size = UDim2.new(0.9, 0, 0, 30)
-    base.Position = UDim2.new(0.5, 0, 0, yPos)
-    base.BackgroundColor3 = Color3.fromRGB(0, 100, 0) -- Green Base
+    base.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Black base
     base.BorderSizePixel = 0
-    base.AnchorPoint = Vector2.new(0.5, 0)
-    base.Parent = contentFrame
     Instance.new("UICorner", base).CornerRadius = UDim.new(0, 6)
+    base.Parent = contentFrame
 
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(0, 40, 0, 20)
     btn.Position = UDim2.new(1, -45, 0.5, -10)
-    btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Black when OFF
+    btn.AnchorPoint = Vector2.new(1, 0.5)
+    btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Black off
     btn.Text = ""
     btn.Parent = base
     Instance.new("UICorner", btn).CornerRadius = UDim.new(1, 0)
@@ -131,16 +137,14 @@ local function makeToggle(text, yPos)
     end)
 end
 
--- Add Toggles (GREEN)
-makeToggle("Freeze Trade", 40)
-makeToggle("Auto Accept", 80)
-makeToggle("Auto Add Items", 120)
+-- Create toggles
+makeToggle("Freeze Trade")
+makeToggle("Auto Accept")
+makeToggle("Auto Add Items")
 
--- "Add Best Fruit" Button
+-- Add Best Fruit Button
 local fruitBtn = Instance.new("TextButton")
 fruitBtn.Size = UDim2.new(0.9, 0, 0, 30)
-fruitBtn.Position = UDim2.new(0.5, 0, 0, 160)
-fruitBtn.AnchorPoint = Vector2.new(0.5, 0)
 fruitBtn.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
 fruitBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
 fruitBtn.Text = "Add Best Fruit"
@@ -153,7 +157,7 @@ fruitBtn.MouseButton1Click:Connect(function()
     print("Best fruit added!")
 end)
 
--- MINIMIZE FUNCTION (Now properly hides content)
+-- Minimize Function
 local minimized = false
 local originalSize = main.Size
 local minimizedSize = UDim2.new(0, 200, 0, 30)
@@ -167,7 +171,7 @@ minimizeBtn.MouseButton1Click:Connect(function()
     bg.Visible = not minimized
 end)
 
--- EXIT FUNCTION
+-- Exit Function
 exitBtn.MouseButton1Click:Connect(function()
     TS:Create(main, TweenInfo.new(0.2), {
         Size = UDim2.new(0, 0, 0, 0),
@@ -177,17 +181,19 @@ exitBtn.MouseButton1Click:Connect(function()
     gui:Destroy()
 end)
 
--- DRAG FUNCTION (Only on Title Bar)
+-- Dragging (only titleBar)
 local drag = { enabled = false, start = nil, startPos = nil }
+local connection
 
 titleBar.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         drag.enabled = true
         drag.start = input.Position
         drag.startPos = main.Position
-        input.Changed:Connect(function()
+        connection = input.Changed:Connect(function()
             if input.UserInputState == Enum.UserInputState.End then
                 drag.enabled = false
+                connection:Disconnect()
             end
         end)
     end
