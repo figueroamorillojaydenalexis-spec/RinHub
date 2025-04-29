@@ -22,10 +22,10 @@ stroke.Thickness = 2
 stroke.Transparency = 0.3
 stroke.Parent = main
 
--- Background Frame
+-- Background Frame (Updated to fit perfectly inside main)
 local bg = Instance.new("Frame")
-bg.Size = UDim2.new(1, -10, 1, -40)
-bg.Position = UDim2.new(0, 5, 0, 35)
+bg.Size = UDim2.new(1, 0, 1, -30)  -- Adjusted size
+bg.Position = UDim2.new(0, 0, 0, 30)  -- Adjusted position to fit below title bar
 bg.BackgroundColor3 = Color3.fromRGB(9, 255, 182)
 bg.BorderSizePixel = 0
 bg.Parent = main
