@@ -9,8 +9,8 @@ gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 
 -- Main Frame
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 200, 0, 200)
-main.Position = UDim2.new(0.5, -100, 0.5, -100)
+main.Size = UDim2.new(0, 200, 0, 230) -- Increased height to fit "Add Best Fruit"
+main.Position = UDim2.new(0.5, -100, 0.5, -115)
 main.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
 main.BorderSizePixel = 0
 main.Parent = gui
@@ -76,18 +76,18 @@ Instance.new("UICorner", exitBtn).CornerRadius = UDim.new(0, 6)
 
 -- Content Frame
 local contentFrame = Instance.new("Frame")
-contentFrame.Size = UDim2.new(1, -10, 1, -40)
+contentFrame.Size = UDim2.new(1, -10, 1, -45) -- Adjusted to fit "Add Best Fruit"
 contentFrame.Position = UDim2.new(0, 5, 0, 35)
 contentFrame.BackgroundTransparency = 1
 contentFrame.Parent = main
 
--- Make Toggle Button Function (fixed)
+-- Make Toggle Button Function (updated colors)
 local function makeToggle(text, order)
     local base = Instance.new("Frame")
     base.Size = UDim2.new(0.9, 0, 0, 30)
     base.Position = UDim2.new(0.5, 0, 0, (order - 1) * 40)
     base.AnchorPoint = Vector2.new(0.5, 0)
-    base.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Black background
+    base.BackgroundColor3 = Color3.fromRGB(3, 244, 202) -- Changed to teal
     base.BorderSizePixel = 0
     base.Parent = contentFrame
     Instance.new("UICorner", base).CornerRadius = UDim.new(0, 6)
@@ -97,7 +97,7 @@ local function makeToggle(text, order)
     txt.Position = UDim2.new(0, 10, 0, 0)
     txt.BackgroundTransparency = 1
     txt.Text = text
-    txt.TextColor3 = Color3.fromRGB(255, 255, 255)
+    txt.TextColor3 = Color3.fromRGB(0, 0, 0) -- Changed to black
     txt.TextSize = 14
     txt.Font = Enum.Font.Gotham
     txt.TextXAlignment = Enum.TextXAlignment.Left
@@ -136,10 +136,10 @@ makeToggle("Freeze Trade", 1)
 makeToggle("Auto Accept", 2)
 makeToggle("Auto Add Items", 3)
 
--- "Add Best Fruit" Button
+-- "Add Best Fruit" Button (fixed position)
 local fruitBtn = Instance.new("TextButton")
 fruitBtn.Size = UDim2.new(0.9, 0, 0, 30)
-fruitBtn.Position = UDim2.new(0.5, 0, 0, 160)
+fruitBtn.Position = UDim2.new(0.5, 0, 0, 120) -- Adjusted position
 fruitBtn.AnchorPoint = Vector2.new(0.5, 0)
 fruitBtn.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
 fruitBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
