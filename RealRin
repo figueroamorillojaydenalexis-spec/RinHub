@@ -9,12 +9,15 @@ gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 
 -- Main Frame
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 200, 0, 230) -- Increased height to fit "Add Best Fruit"
+main.Size = UDim2.new(0, 200, 0, 230) -- Adjusted height for "Add Best Fruit"
 main.Position = UDim2.new(0.5, -100, 0.5, -115)
 main.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
 main.BorderSizePixel = 0
 main.Parent = gui
-Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 10)
+corner.Parent = main
 
 local stroke = Instance.new("UIStroke")
 stroke.Color = Color3.fromRGB(9, 255, 182)
@@ -29,7 +32,10 @@ bg.Position = UDim2.new(0, 5, 0, 35)
 bg.BackgroundColor3 = Color3.fromRGB(9, 255, 182)
 bg.BorderSizePixel = 0
 bg.Parent = main
-Instance.new("UICorner", bg).CornerRadius = UDim.new(0, 6)
+
+local bgCorner = Instance.new("UICorner")
+bgCorner.CornerRadius = UDim.new(0, 6)
+bgCorner.Parent = bg
 
 -- Title Bar
 local titleBar = Instance.new("Frame")
@@ -59,7 +65,10 @@ minimizeBtn.Text = "_"
 minimizeBtn.Font = Enum.Font.GothamBold
 minimizeBtn.TextSize = 18
 minimizeBtn.Parent = titleBar
-Instance.new("UICorner", minimizeBtn).CornerRadius = UDim.new(0, 6)
+
+local minCorner = Instance.new("UICorner")
+minCorner.CornerRadius = UDim.new(0, 6)
+minCorner.Parent = minimizeBtn
 
 -- Exit Button
 local exitBtn = Instance.new("TextButton")
@@ -72,32 +81,38 @@ exitBtn.Text = "X"
 exitBtn.Font = Enum.Font.GothamBold
 exitBtn.TextSize = 14
 exitBtn.Parent = titleBar
-Instance.new("UICorner", exitBtn).CornerRadius = UDim.new(0, 6)
+
+local exitCorner = Instance.new("UICorner")
+exitCorner.CornerRadius = UDim.new(0, 6)
+exitCorner.Parent = exitBtn
 
 -- Content Frame
 local contentFrame = Instance.new("Frame")
-contentFrame.Size = UDim2.new(1, -10, 1, -45) -- Adjusted to fit "Add Best Fruit"
+contentFrame.Size = UDim2.new(1, -10, 1, -45)
 contentFrame.Position = UDim2.new(0, 5, 0, 35)
 contentFrame.BackgroundTransparency = 1
 contentFrame.Parent = main
 
--- Make Toggle Button Function (updated colors)
+-- Make Toggle Button Function (fixed)
 local function makeToggle(text, order)
     local base = Instance.new("Frame")
     base.Size = UDim2.new(0.9, 0, 0, 30)
     base.Position = UDim2.new(0.5, 0, 0, (order - 1) * 40)
     base.AnchorPoint = Vector2.new(0.5, 0)
-    base.BackgroundColor3 = Color3.fromRGB(3, 244, 202) -- Changed to teal
+    base.BackgroundColor3 = Color3.fromRGB(3, 244, 202) -- Teal background
     base.BorderSizePixel = 0
     base.Parent = contentFrame
-    Instance.new("UICorner", base).CornerRadius = UDim.new(0, 6)
+
+    local baseCorner = Instance.new("UICorner")
+    baseCorner.CornerRadius = UDim.new(0, 6)
+    baseCorner.Parent = base
 
     local txt = Instance.new("TextLabel")
     txt.Size = UDim2.new(1, -60, 1, 0)
     txt.Position = UDim2.new(0, 10, 0, 0)
     txt.BackgroundTransparency = 1
     txt.Text = text
-    txt.TextColor3 = Color3.fromRGB(0, 0, 0) -- Changed to black
+    txt.TextColor3 = Color3.fromRGB(0, 0, 0) -- Black text
     txt.TextSize = 14
     txt.Font = Enum.Font.Gotham
     txt.TextXAlignment = Enum.TextXAlignment.Left
@@ -110,14 +125,20 @@ local function makeToggle(text, order)
     btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     btn.Text = ""
     btn.Parent = base
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(1, 0)
+
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(1, 0)
+    btnCorner.Parent = btn
 
     local dot = Instance.new("Frame")
     dot.Size = UDim2.new(0, 16, 0, 16)
     dot.Position = UDim2.new(0, 2, 0.5, -8)
     dot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     dot.Parent = btn
-    Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
+
+    local dotCorner = Instance.new("UICorner")
+    dotCorner.CornerRadius = UDim.new(1, 0)
+    dotCorner.Parent = dot
 
     local on = false
     btn.MouseButton1Click:Connect(function()
@@ -136,10 +157,10 @@ makeToggle("Freeze Trade", 1)
 makeToggle("Auto Accept", 2)
 makeToggle("Auto Add Items", 3)
 
--- "Add Best Fruit" Button (fixed position)
+-- "Add Best Fruit" Button (fixed)
 local fruitBtn = Instance.new("TextButton")
 fruitBtn.Size = UDim2.new(0.9, 0, 0, 30)
-fruitBtn.Position = UDim2.new(0.5, 0, 0, 120) -- Adjusted position
+fruitBtn.Position = UDim2.new(0.5, 0, 0, 120)
 fruitBtn.AnchorPoint = Vector2.new(0.5, 0)
 fruitBtn.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
 fruitBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
@@ -147,7 +168,10 @@ fruitBtn.Text = "Add Best Fruit"
 fruitBtn.Font = Enum.Font.GothamBold
 fruitBtn.TextSize = 14
 fruitBtn.Parent = contentFrame
-Instance.new("UICorner", fruitBtn).CornerRadius = UDim.new(0, 6)
+
+local fruitCorner = Instance.new("UICorner")
+fruitCorner.CornerRadius = UDim.new(0, 6)
+fruitCorner.Parent = fruitBtn
 
 fruitBtn.MouseButton1Click:Connect(function()
     print("Best fruit added!")
