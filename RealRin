@@ -83,68 +83,7 @@ layout.Parent = contentFrame
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 layout.Padding = UDim.new(0, 10)
 
--- Make Toggle Button Function
-local function makeToggle(text)
-    local base = Instance.new("Frame")
-    base.Size = UDim2.new(1, 0, 0, 30)
-    base.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
-    base.BorderSizePixel = 0
-    base.Parent = contentFrame
-    Instance.new("UICorner", base).CornerRadius = UDim.new(0, 6)
-
-    -- Line
-    local line = Instance.new("Frame")
-    line.Size = UDim2.new(0, 2, 1, 0)
-    line.Position = UDim2.new(0, 0, 0, 0)
-    line.BackgroundColor3 = Color3.fromRGB(0, 200, 150)
-    line.BorderSizePixel = 0
-    line.Parent = base
-
-    local txt = Instance.new("TextLabel")
-    txt.Size = UDim2.new(1, -60, 1, 0)
-    txt.Position = UDim2.new(0, 10, 0, 0)
-    txt.BackgroundTransparency = 1
-    txt.Text = text
-    txt.TextColor3 = Color3.fromRGB(0, 0, 0)
-    txt.TextSize = 14
-    txt.Font = Enum.Font.Gotham
-    txt.TextXAlignment = Enum.TextXAlignment.Left
-    txt.Parent = base
-
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 40, 0, 20)
-    btn.Position = UDim2.new(1, -10, 0.5, 0)
-    btn.AnchorPoint = Vector2.new(1, 0.5)
-    btn.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
-    btn.Text = ""
-    btn.Parent = base
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(1, 0)
-
-    local dot = Instance.new("Frame")
-    dot.Size = UDim2.new(0, 16, 0, 16)
-    dot.Position = UDim2.new(0, 2, 0.5, -8)
-    dot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    dot.Parent = btn
-    Instance.new("UICorner", dot).CornerRadius = UDim.new(1, 0)
-
-    local on = false
-    btn.MouseButton1Click:Connect(function()
-        on = not on
-        TS:Create(btn, TweenInfo.new(0.2), {
-            BackgroundColor3 = on and Color3.fromRGB(0, 255, 127) or Color3.fromRGB(3, 244, 202)
-        }):Play()
-        TS:Create(dot, TweenInfo.new(0.2), {
-            Position = on and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
-        }):Play()
-    end)
-end
-
--- Create Toggles
-makeToggle("Freeze Trade")
-makeToggle("Auto Accept")
-makeToggle("Auto Add Items")
-
--- "Add Best Fruit" Button
+-- Add Best Fruit Button
 local fruitBtn = Instance.new("TextButton")
 fruitBtn.Size = UDim2.new(1, 0, 0, 30)
 fruitBtn.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
@@ -159,7 +98,7 @@ fruitBtn.MouseButton1Click:Connect(function()
     print("Best fruit added!")
 end)
 
--- "Kick Player" Button
+-- Kick Player Button
 local kickPlayerBtn = Instance.new("TextButton")
 kickPlayerBtn.Size = UDim2.new(1, 0, 0, 30)
 kickPlayerBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0) -- Red background
@@ -171,7 +110,7 @@ kickPlayerBtn.Parent = contentFrame
 Instance.new("UICorner", kickPlayerBtn).CornerRadius = UDim.new(0, 6)
 
 kickPlayerBtn.MouseButton1Click:Connect(function()
-    print("Player has been kicked!")
+    print("Player has been kicked!")  -- This is just for the UI, real kick logic needs server-side code.
 end)
 
 -- Minimize Function
@@ -189,6 +128,7 @@ end)
 
 -- Exit Function with Confirmation
 exitBtn.MouseButton1Click:Connect(function()
+    -- Confirmation UI
     local confirmExit = Instance.new("Frame")
     confirmExit.Size = UDim2.new(0, 200, 0, 100)
     confirmExit.Position = UDim2.new(0.5, -100, 0.5, -50)
