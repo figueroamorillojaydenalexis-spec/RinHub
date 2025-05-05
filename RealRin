@@ -8,6 +8,7 @@ local ContentProvider = game:GetService("ContentProvider")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
+-- Loading Screen UI
 local loadingGui = Instance.new("ScreenGui")
 loadingGui.Name = "BloxFruitsLoading"
 loadingGui.IgnoreGuiInset = true
@@ -67,6 +68,7 @@ spinnerFrame.Size = UDim2.new(0, 40, 0, 40)
 spinnerFrame.BackgroundTransparency = 1
 spinnerFrame.Position = UDim2.new(0.5, 0, 0.85, 0)
 spinnerFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+spinnerFrame.Visible = false -- Initially hidden
 
 local dots = {}
 for i = 1, 4 do
@@ -76,18 +78,18 @@ for i = 1, 4 do
     dot.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
     dot.BorderSizePixel = 0
     dot.AnchorPoint = Vector2.new(0.5, 0.5)
-    
+
     local angle = (i - 1) * math.pi / 2
     local radius = 15
     local xPos = math.cos(angle) * radius
     local yPos = math.sin(angle) * radius
-    
+
     dot.Position = UDim2.new(0.5, xPos, 0.5, yPos)
-    
+
     local cornerRadius = Instance.new("UICorner")
     cornerRadius.CornerRadius = UDim.new(1, 0)
     cornerRadius.Parent = dot
-    
+
     dots[i] = dot
     dot.Parent = spinnerFrame
 end
@@ -105,9 +107,11 @@ local mainUIStroke = Instance.new("UIStroke")
 mainUIStroke.Color = Color3.fromRGB(65, 105, 225)
 mainUIStroke.Thickness = 2
 mainUIStroke.Transparency = 0.3
+mainUIStroke.Parent = mainUI
 
 local uiCorner = Instance.new("UICorner")
 uiCorner.CornerRadius = UDim.new(0.02, 0)
+uiCorner.Parent = mainUI
 
 local uiGradient = Instance.new("UIGradient")
 uiGradient.Color = ColorSequence.new({
@@ -115,6 +119,7 @@ uiGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 24, 35))
 })
 uiGradient.Rotation = 45
+uiGradient.Parent = mainUI
 
 local accentBar = Instance.new("Frame")
 accentBar.Name = "AccentBar"
@@ -123,9 +128,11 @@ accentBar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 accentBar.BorderSizePixel = 0
 accentBar.Position = UDim2.new(0.5, 0, 0.08, 0)
 accentBar.AnchorPoint = Vector2.new(0.5, 0.5)
+accentBar.Parent = mainUI
 
 local accentBarCorner = Instance.new("UICorner")
 accentBarCorner.CornerRadius = UDim.new(1, 0)
+accentBarCorner.Parent = accentBar
 
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Name = "Title"
@@ -136,6 +143,7 @@ titleLabel.Font = Enum.Font.GothamBlack
 titleLabel.Text = "BLOX FRUITS"
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 titleLabel.TextScaled = true
+titleLabel.Parent = mainUI
 
 local titleShadow = titleLabel:Clone()
 titleShadow.Name = "TitleShadow"
@@ -143,6 +151,7 @@ titleShadow.TextColor3 = Color3.fromRGB(0, 170, 255)
 titleShadow.TextTransparency = 0.7
 titleShadow.Position = UDim2.new(0, 2, 0.13, 2)
 titleShadow.ZIndex = titleLabel.ZIndex - 1
+titleShadow.Parent = mainUI
 
 local subtitleLabel = Instance.new("TextLabel")
 subtitleLabel.Name = "Subtitle"
@@ -154,6 +163,7 @@ subtitleLabel.Font = Enum.Font.GothamSemibold
 subtitleLabel.Text = "Final Stage of Loading"
 subtitleLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 subtitleLabel.TextScaled = true
+subtitleLabel.Parent = mainUI
 
 local decorativeLine1 = Instance.new("Frame")
 decorativeLine1.Name = "DecoLine1"
@@ -161,6 +171,7 @@ decorativeLine1.Size = UDim2.new(0.2, 0, 0.003, 0)
 decorativeLine1.BackgroundColor3 = Color3.fromRGB(65, 105, 225)
 decorativeLine1.Position = UDim2.new(0.2, 0, 0.35, 0)
 decorativeLine1.BorderSizePixel = 0
+decorativeLine1.Parent = mainUI
 
 local decorativeLine2 = Instance.new("Frame")
 decorativeLine2.Name = "DecoLine2"
@@ -169,6 +180,7 @@ decorativeLine2.BackgroundColor3 = Color3.fromRGB(65, 105, 225)
 decorativeLine2.Position = UDim2.new(0.8, 0, 0.35, 0)
 decorativeLine2.AnchorPoint = Vector2.new(1, 0)
 decorativeLine2.BorderSizePixel = 0
+decorativeLine2.Parent = mainUI
 
 local statusLabel = Instance.new("TextLabel")
 statusLabel.Name = "Status"
@@ -180,6 +192,7 @@ statusLabel.Font = Enum.Font.GothamMedium
 statusLabel.Text = "Status: Initializing..."
 statusLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
 statusLabel.TextScaled = true
+statusLabel.Parent = mainUI
 
 local percentLabel = Instance.new("TextLabel")
 percentLabel.Name = "Percent"
@@ -191,6 +204,7 @@ percentLabel.Font = Enum.Font.GothamBold
 percentLabel.Text = "0%"
 percentLabel.TextColor3 = Color3.fromRGB(0, 170, 255)
 percentLabel.TextScaled = true
+percentLabel.Parent = mainUI
 
 local progressBarBackground = Instance.new("Frame")
 progressBarBackground.Name = "ProgressBarBg"
@@ -199,23 +213,28 @@ progressBarBackground.Position = UDim2.new(0.5, 0, 0.55, 0)
 progressBarBackground.AnchorPoint = Vector2.new(0.5, 0.5)
 progressBarBackground.BackgroundColor3 = Color3.fromRGB(40, 44, 55)
 progressBarBackground.BorderSizePixel = 0
+progressBarBackground.Parent = mainUI
 
 local progressBarStroke = Instance.new("UIStroke")
 progressBarStroke.Color = Color3.fromRGB(65, 105, 225)
 progressBarStroke.Thickness = 1
 progressBarStroke.Transparency = 0.7
+progressBarStroke.Parent = progressBarBackground
 
 local progressBarCorner = Instance.new("UICorner")
 progressBarCorner.CornerRadius = UDim.new(0.5, 0)
+progressBarCorner.Parent = progressBarBackground
 
 local progressBar = Instance.new("Frame")
 progressBar.Name = "ProgressBar"
 progressBar.Size = UDim2.new(0, 0, 1, 0)
 progressBar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 progressBar.BorderSizePixel = 0
+progressBar.Parent = progressBarBackground
 
 local progressBarCorner2 = Instance.new("UICorner")
 progressBarCorner2.CornerRadius = UDim.new(0.5, 0)
+progressBarCorner2.Parent = progressBar
 
 local progressGradient = Instance.new("UIGradient")
 progressGradient.Color = ColorSequence.new({
@@ -224,6 +243,7 @@ progressGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 170, 255))
 })
 progressGradient.Offset = Vector2.new(0, 0)
+progressGradient.Parent = progressBar
 
 local infoPanel = Instance.new("Frame")
 infoPanel.Name = "InfoPanel"
@@ -233,14 +253,17 @@ infoPanel.AnchorPoint = Vector2.new(0.5, 0)
 infoPanel.BackgroundColor3 = Color3.fromRGB(30, 34, 45)
 infoPanel.BackgroundTransparency = 0.5
 infoPanel.BorderSizePixel = 0
+infoPanel.Parent = mainUI
 
 local infoPanelCorner = Instance.new("UICorner")
 infoPanelCorner.CornerRadius = UDim.new(0.05, 0)
+infoPanelCorner.Parent = infoPanel
 
 local infoPanelStroke = Instance.new("UIStroke")
 infoPanelStroke.Color = Color3.fromRGB(65, 105, 225)
 infoPanelStroke.Thickness = 1
 infoPanelStroke.Transparency = 0.7
+infoPanelStroke.Parent = infoPanel
 
 local infoTitle = Instance.new("TextLabel")
 infoTitle.Name = "InfoTitle"
@@ -250,6 +273,7 @@ infoTitle.Font = Enum.Font.GothamSemibold
 infoTitle.Text = "LOADING DETAILS"
 infoTitle.TextColor3 = Color3.fromRGB(0, 170, 255)
 infoTitle.TextScaled = true
+infoTitle.Parent = infoPanel
 
 local infoContent = Instance.new("TextLabel")
 infoContent.Name = "InfoContent"
@@ -264,11 +288,16 @@ infoContent.TextScaled = true
 infoContent.TextWrapped = true
 infoContent.TextXAlignment = Enum.TextXAlignment.Left
 infoContent.TextYAlignment = Enum.TextYAlignment.Top
+infoContent.Parent = infoPanel
+
+-- Cached Tween Objects (for potential reuse)
+local progressBarTween
+local mainUITween
 
 local function animateSpinner()
     local spinSpeed = 2
     local dotOpacity = {1, 0.7, 0.4, 0.1}
-    
+
     return RunService.Heartbeat:Connect(function()
         if spinnerFrame.Visible then
             for i = 1, 4 do
@@ -285,608 +314,3 @@ end
 local function animateProgressGradient()
     return RunService.Heartbeat:Connect(function()
         if progressGradient and mainUI.Visible then
-            progressGradient.Offset = Vector2.new((tick() * 0.2) % 2 - 1, 0)
-        end
-    end)
-end
-
-local function typewriterEffect(text, duration)
-    messageText.Text = ""
-    local textLength = string.len(text)
-    local timePerChar = duration / textLength
-    
-    for i = 1, textLength do
-        messageText.Text = string.sub(text, 1, i)
-        task.wait(timePerChar)
-    end
-end
-
-local function updateProgressBar(percentage)
-    TweenService:Create(progressBar, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-        Size = UDim2.new(percentage / 100, 0, 1, 0)
-    }):Play()
-    percentLabel.Text = string.format("%.0f%%", percentage)
-end
-
-local function updateStatus(status)
-    statusLabel.Text = "Status: " .. status
-end
-
-local function updateInfoContent(info)
-    infoContent.Text = info
-end
-
-local linePool = {}
-local dotPool = {}
-
-local function createOrGetLine()
-    local line = table.remove(linePool)
-    if not line then
-        line = Instance.new("Frame")
-        line.BackgroundColor3 = Color3.fromRGB(65, 105, 225)
-        line.BackgroundTransparency = 0.7
-        line.BorderSizePixel = 0
-    end
-    return line
-end
-
-local function createOrGetDot()
-    local dot = table.remove(dotPool)
-    if not dot then
-        dot = Instance.new("Frame")
-        dot.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-        dot.BackgroundTransparency = 0.8
-        dot.BorderSizePixel = 0
-        
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(1, 0)
-        corner.Parent = dot
-    end
-    return dot
-end
-
-local function returnToPool(item, pool)
-    item.Parent = nil
-    table.insert(pool, item)
-end
-
-local function createBackgroundEffects()
-    local effectsContainer = Instance.new("Frame")
-    effectsContainer.Name = "Effects"
-    effectsContainer.Size = UDim2.new(1, 0, 1, 0)
-    effectsContainer.BackgroundTransparency = 1
-    effectsContainer.ClipsDescendants = true
-    
-    local lines = {}
-    for i = 1, 12 do
-        local line = createOrGetLine()
-        local height = math.random(40, 100)
-        local width = math.random(1, 2)
-        line.Size = UDim2.new(0, width, 0, height)
-        
-        local xPos = math.random(0, 100) / 100
-        local yPos = math.random(0, 100) / 100
-        
-        line.Position = UDim2.new(xPos, 0, yPos, 0)
-        line.Parent = effectsContainer
-        lines[i] = {element = line, xPos = xPos}
-        
-        task.spawn(function()
-            while mainUI.Visible do
-                local duration = math.random(3, 7)
-                local newYPos = math.random(-20, 120) / 100
-                
-                TweenService:Create(line, TweenInfo.new(duration, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-                    Position = UDim2.new(xPos, 0, newYPos, 0),
-                    BackgroundTransparency = math.random(70, 90) / 100
-                }):Play()
-                
-                task.wait(duration)
-            end
-            returnToPool(line, linePool)
-        end)
-    end
-    
-    local dots = {}
-    for i = 1, 15 do
-        local dot = createOrGetDot()
-        local size = math.random(2, 4)
-        dot.Size = UDim2.new(0, size, 0, size)
-        
-        local xPos = math.random(0, 100) / 100
-        local yPos = math.random(0, 100) / 100
-        
-        dot.Position = UDim2.new(xPos, 0, yPos, 0)
-        dot.Parent = effectsContainer
-        dots[i] = {element = dot, xPos = xPos, yPos = yPos}
-        
-        task.spawn(function()
-            local currentXPos = xPos
-            local currentYPos = yPos
-            
-            while mainUI.Visible do
-                local duration = math.random(2, 5)
-                local newXPos = currentXPos + (math.random(-10, 10) / 100)
-                local newYPos = currentYPos + (math.random(-10, 10) / 100)
-                
-                TweenService:Create(dot, TweenInfo.new(duration, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
-                    Position = UDim2.new(newXPos, 0, newYPos, 0),
-                    BackgroundTransparency = math.random(70, 90) / 100
-                }):Play()
-                
-                task.wait(duration)
-                
-                currentXPos = newXPos
-                currentYPos = newYPos
-            end
-            returnToPool(dot, dotPool)
-        end)
-    end
-    
-    return effectsContainer
-end
-
-local function disableDefaultUI()
-    pcall(function()
-        StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
-        StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false)
-    end)
-end
-
-local function startLoading()
-    disableDefaultUI()
-    
-    TweenService:Create(backgroundFrame, TweenInfo.new(1, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-        Size = UDim2.new(1, 0, 1, 0)
-    }):Play()
-    
-    task.wait(1)
-    
-    TweenService:Create(logoImage, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-        ImageTransparency = 0
-    }):Play()
-    
-    spinnerFrame.Visible = true
-    local spinnerConnection = animateSpinner()
-    
-    task.wait(1.5)
-    
-    local replicaMessages = {
-        "Hello! The script is almost done loading. We just need to do some extra steps",
-        "During the last stage of loading - Please, do NOT leave the game. Or it could result in data loss",
-        "Well yeah. That's all you need to know. Now - Just wait."
-    }
-    
-    for _, message in ipairs(replicaMessages) do
-        typewriterEffect(message, 3)
-        task.wait(4)
-    end
-    
-    task.wait(1)
-    
-    TweenService:Create(logoImage, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-        ImageTransparency = 1
-    }):Play()
-    
-    task.wait(0.8)
-    
-    messageFrame.Visible = false
-    mainUI.Visible = true
-    
-    local progressGradientConnection = animateProgressGradient()
-    local effectsContainer = createBackgroundEffects()
-    effectsContainer.Parent = mainUI
-    
-    TweenService:Create(mainUI, TweenInfo.new(1, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Position = UDim2.new(0.5, 0, 0.5, 0)
-    }):Play()
-    
-    local loadingSteps = {
-        {
-            status = "Waking up systems...", 
-            info = "- Booting main modules\n- Getting Data\n- Getting stuff ready", 
-            time = 20
-        },
-        {
-            status = "Loading the heavy stuff...", 
-            info = "- Grabbing all those scripts tables\n- Loading the big modules\n- Making sure everything fits\n- Checking for bugs", 
-            time = 35
-        },
-        {
-            status = "Checking connections...", 
-            info = "- Making sure we're online\n- Testing server response\n- Checking your internet\n- Setting up server", 
-            time = 30
-        },
-        {
-            status = "Finding your stuff...", 
-            info = "- Looking for your save data\n- Grabbing your settings\n- Making sure nothing's missing\n- Getting your script ready", 
-            time = 40
-        },
-        {
-            status = "Setting up the main parts...", 
-            info = "- Loading stuff\n- Setting up all the extras\n- Making sure everything works\n- Final testing", 
-            time = 35
-        },
-        {
-            status = "Last few bits...", 
-            info = "- Crossing our t's\n- Dotting our i's\n- Making things smooth\n- Just a moment longer", 
-            time = 25
-        },
-        {
-            status = "We're good to go!", 
-            info = "- Everything's loaded\n- No problems found\n- Let's get started!", 
-            time = 15
-        }
-    }
-    
-    local totalTime = 300
-    local elapsedTime = 0
-    
-    local currentStep = 1
-    local currentStepTime = 0
-    
-    while elapsedTime < totalTime do
-        local step = loadingSteps[currentStep]
-        updateStatus(step.status)
-        updateInfoContent(step.info)
-        
-        currentStepTime = currentStepTime + 1
-        
-        if currentStepTime >= step.time then
-            currentStepTime = 0
-            currentStep = currentStep + 1
-            if currentStep > #loadingSteps then
-                currentStep = #loadingSteps
-            end
-        end
-        
-        local percentage = (elapsedTime / totalTime) * 100
-        updateProgressBar(percentage)
-        
-        task.wait(1)
-        elapsedTime = elapsedTime + 1
-    end
-    
-    updateProgressBar(100)
-    updateStatus("Loading complete!")
-    updateInfoContent("- Script is Loaded!\n- Script is ready\n- Have Fun!")
-    
-    task.wait(2)
-    
-    TweenService:Create(mainUI, TweenInfo.new(1, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
-        Position = UDim2.new(1.5, 0, 0.5, 0)
-    }):Play()
-    
-    task.wait(1)
-    
-    TweenService:Create(backgroundFrame, TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-        BackgroundTransparency = 1
-    }):Play()
-    
-    TweenService:Create(backgroundPattern, TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-        ImageTransparency = 1
-    }):Play()
-    
-    task.wait(1.5)
-    
-    if spinnerConnection then
-        spinnerConnection:Disconnect()
-    end
-    
-    if progressGradientConnection then
-        progressGradientConnection:Disconnect()
-    end
-    
-    pcall(function()
-        StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, true)
-    end)
-    
-    loadingGui:Destroy()
-end
-
-local function handleResponsiveUI()
-    local function updateUI()
-        local viewportSize = workspace.CurrentCamera.ViewportSize
-        local isPortrait = viewportSize.Y > viewportSize.X
-        
-        if isPortrait then
-            mainUI.Size = UDim2.new(0.95, 0, 0.7, 0)
-            messageFrame.Size = UDim2.new(0.95, 0, 0.7, 0)
-            messageText.TextSize = 20
-            infoContent.TextSize = 16
-        else
-            mainUI.Size = UDim2.new(0.8, 0, 0.7, 0)
-            messageFrame.Size = UDim2.new(0.8, 0, 0.6, 0)
-            messageText.TextSize = 24
-            infoContent.TextSize = 18
-        end
-    end
-    
-    updateUI()
-    workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateUI)
-end
-
-backgroundPattern.Parent = backgroundFrame
-messageFrame.Parent = backgroundFrame
-logoImage.Parent = messageFrame
-messageText.Parent = messageFrame
-spinnerFrame.Parent = messageFrame
-progressBarCorner.Parent = progressBarBackground
-progressBarStroke.Parent = progressBarBackground
-progressBar.Parent = progressBarBackground
-progressBarCorner2.Parent = progressBar
-progressGradient.Parent = progressBar
-backgroundFrame.Parent = loadingGui
-mainUIStroke.Parent = mainUI
-uiCorner.Parent = mainUI
-uiGradient.Parent = mainUI
-accentBarCorner.Parent = accentBar
-accentBar.Parent = mainUI
-titleLabel.Parent = mainUI
-titleShadow.Parent = mainUI
-subtitleLabel.Parent = mainUI
-decorativeLine1.Parent = mainUI
-decorativeLine2.Parent = mainUI
-statusLabel.Parent = mainUI
-percentLabel.Parent = mainUI
-progressBarBackground.Parent = mainUI
-infoPanelCorner.Parent = infoPanel
-infoPanelStroke.Parent = infoPanel
-infoTitle.Parent = infoPanel
-infoContent.Parent = infoPanel
-infoPanel.Parent = mainUI
-mainUI.Parent = loadingGui
-loadingGui.Parent = playerGui
-
-handleResponsiveUI()
-startLoading()
-
--- Services
-local Players = game:GetService("Players")
-local UIS = game:GetService("UserInputService")
-local TS = game:GetService("TweenService")
-
--- UI Setup
-local gui = Instance.new("ScreenGui")
-gui.ResetOnSpawn = false
-gui.Name = "RinHubUI"
-gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
-
--- Main Frame
-local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 200, 0, 230)
-main.Position = UDim2.new(0.5, -100, 0.5, -115)
-main.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
-main.BorderSizePixel = 0
-main.Parent = gui
-
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0, 10)
-corner.Parent = main
-
-local stroke = Instance.new("UIStroke")
-stroke.Color = Color3.fromRGB(9, 255, 182)
-stroke.Thickness = 2
-stroke.Transparency = 0.3
-stroke.Parent = main
-
--- Background
-local bg = Instance.new("Frame")
-bg.Size = UDim2.new(1, -10, 1, -40)
-bg.Position = UDim2.new(0, 5, 0, 35)
-bg.BackgroundColor3 = Color3.fromRGB(9, 255, 182)
-bg.BorderSizePixel = 0
-bg.Parent = main
-
-local bgCorner = Instance.new("UICorner")
-bgCorner.CornerRadius = UDim.new(0, 6)
-bgCorner.Parent = bg
-
--- Title Bar
-local titleBar = Instance.new("Frame")
-titleBar.Size = UDim2.new(1, 0, 0, 30)
-titleBar.BackgroundTransparency = 1
-titleBar.Parent = main
-
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, -60, 1, 0)
-title.Position = UDim2.new(0, 10, 0, 0)
-title.BackgroundTransparency = 1
-title.Text = "Rin Hub"
-title.TextColor3 = Color3.fromRGB(0, 0, 0)
-title.TextSize = 16
-title.Font = Enum.Font.GothamBold
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.Parent = titleBar
-
--- Minimize Button
-local minimizeBtn = Instance.new("TextButton")
-minimizeBtn.Size = UDim2.new(0, 25, 0, 25)
-minimizeBtn.Position = UDim2.new(1, -55, 0, 2)
-minimizeBtn.AnchorPoint = Vector2.new(1, 0)
-minimizeBtn.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
-minimizeBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
-minimizeBtn.Text = "_"
-minimizeBtn.Font = Enum.Font.GothamBold
-minimizeBtn.TextSize = 18
-minimizeBtn.Parent = titleBar
-
-local minCorner = Instance.new("UICorner")
-minCorner.CornerRadius = UDim.new(0, 6)
-minCorner.Parent = minimizeBtn
-
--- Exit Button
-local exitBtn = Instance.new("TextButton")
-exitBtn.Size = UDim2.new(0, 25, 0, 25)
-exitBtn.Position = UDim2.new(1, -25, 0, 2)
-exitBtn.AnchorPoint = Vector2.new(1, 0)
-exitBtn.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
-exitBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
-exitBtn.Text = "X"
-exitBtn.Font = Enum.Font.GothamBold
-exitBtn.TextSize = 14
-exitBtn.Parent = titleBar
-
-local exitCorner = Instance.new("UICorner")
-exitCorner.CornerRadius = UDim.new(0, 6)
-exitCorner.Parent = exitBtn
-
--- Content Frame
-local contentFrame = Instance.new("Frame")
-contentFrame.Size = UDim2.new(1, -10, 1, -45)
-contentFrame.Position = UDim2.new(0, 5, 0, 35)
-contentFrame.BackgroundTransparency = 1
-contentFrame.Parent = main
-
--- Update contentFrame size dynamically
-local function updateContentFrameSize()
-    local contentHeight = 35
-    contentHeight = contentHeight + 30 * 3 + 30
-    contentFrame.Size = UDim2.new(1, -10, 0, contentHeight - 45)
-    main.Size = UDim2.new(0, 200, 0, contentHeight + 35)
-end
-
--- Make Toggle Button
-local function makeToggle(text, order)
-    local base = Instance.new("Frame")
-    base.Size = UDim2.new(0.9, 0, 0, 30)
-    base.Position = UDim2.new(0.5, 0, 0, (order - 1) * 40)
-    base.AnchorPoint = Vector2.new(0.5, 0)
-    base.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
-    base.BorderSizePixel = 0
-    base.Parent = contentFrame
-
-    local baseCorner = Instance.new("UICorner")
-    baseCorner.CornerRadius = UDim.new(0, 6)
-    baseCorner.Parent = base
-
-    local txt = Instance.new("TextLabel")
-    txt.Size = UDim2.new(1, -60, 1, 0)
-    txt.Position = UDim2.new(0, 10, 0, 0)
-    txt.BackgroundTransparency = 1
-    txt.Text = text
-    txt.TextColor3 = Color3.fromRGB(0, 0, 0)
-    txt.TextSize = 14
-    txt.Font = Enum.Font.Gotham
-    txt.TextXAlignment = Enum.TextXAlignment.Left
-    txt.Parent = base
-
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 40, 0, 20)
-    btn.Position = UDim2.new(1, -10, 0.5, 0)
-    btn.AnchorPoint = Vector2.new(1, 0.5)
-    btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    btn.Text = ""
-    btn.Parent = base
-
-    local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(1, 0)
-    btnCorner.Parent = btn
-
-    local dot = Instance.new("Frame")
-    dot.Size = UDim2.new(0, 16, 0, 16)
-    dot.Position = UDim2.new(0, 2, 0.5, -8)
-    dot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    dot.Parent = btn
-
-    local dotCorner = Instance.new("UICorner")
-    dotCorner.CornerRadius = UDim.new(1, 0)
-    dotCorner.Parent = dot
-
-    local on = false
-    btn.MouseButton1Click:Connect(function()
-        on = not on
-        TS:Create(btn, TweenInfo.new(0.2), {
-            BackgroundColor3 = on and Color3.fromRGB(0, 255, 127) or Color3.fromRGB(0, 0, 0)
-        }):Play()
-        TS:Create(dot, TweenInfo.new(0.2), {
-            Position = on and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
-        }):Play()
-    end)
-end
-
--- Create Toggles
-makeToggle("Freeze Trade", 1)
-makeToggle("Auto Accept", 2)
-makeToggle("Auto Add Items", 3)
-updateContentFrameSize()
-
--- Add Best Fruit Button
-local fruitBtn = Instance.new("TextButton")
-fruitBtn.Size = UDim2.new(0.9, 0, 0, 30)
-fruitBtn.Position = UDim2.new(0.5, 0, 0, 120)
-fruitBtn.AnchorPoint = Vector2.new(0.5, 0)
-fruitBtn.BackgroundColor3 = Color3.fromRGB(3, 244, 202)
-fruitBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
-fruitBtn.Text = "Add Best Fruit"
-fruitBtn.Font = Enum.Font.GothamBold
-fruitBtn.TextSize = 14
-fruitBtn.Parent = contentFrame
-
-local fruitCorner = Instance.new("UICorner")
-fruitCorner.CornerRadius = UDim.new(0, 6)
-fruitCorner.Parent = fruitBtn
-
-fruitBtn.MouseButton1Click:Connect(function()
-    print("Best fruit added!")
-end)
-
--- Minimize Function
-local minimized = false
-local originalSize = main.Size
-local minimizedSize = UDim2.new(0, 200, 0, 30)
-
-minimizeBtn.MouseButton1Click:Connect(function()
-    minimized = not minimized
-    TS:Create(main, TweenInfo.new(0.3), {
-        Size = minimized and minimizedSize or originalSize
-    }):Play()
-    contentFrame.Visible = not minimized
-    bg.Visible = not minimized
-end)
-
--- Exit Function
-exitBtn.MouseButton1Click:Connect(function()
-    TS:Create(main, TweenInfo.new(0.2), {
-        Size = UDim2.new(0, 0, 0, 0),
-        Position = UDim2.new(0.5, 0, 0.5, 0)
-    }):Play()
-    task.wait(0.2)
-    gui:Destroy()
-end)
-
--- Dragging Support (Mobile + PC)
-local dragging
-local dragInput
-local dragStart
-local startPos
-
-local function update(input)
-    local delta = input.Position - dragStart
-    main.Position = UDim2.new(
-        startPos.X.Scale,
-        startPos.X.Offset + delta.X,
-        startPos.Y.Scale,
-        startPos.Y.Offset + delta.Y
-    )
-end
-
-titleBar.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = main.Position
-
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
-end)
-
-UIS.InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-        update(input)
-    end
-end)
