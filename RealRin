@@ -1,103 +1,642 @@
--- LocalScript in StarterPlayerScripts
-
 local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
+local RunService = game:GetService("RunService")
+local ContentProvider = game:GetService("ContentProvider")
+
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- Create loading GUI
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "LoadingScreen"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = playerGui
+local loadingGui = Instance.new("ScreenGui")
+loadingGui.Name = "BloxFruitsLoading"
+loadingGui.IgnoreGuiInset = true
+loadingGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+loadingGui.ResetOnSpawn = false
 
--- Background
-local bg = Instance.new("Frame")
-bg.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-bg.Size = UDim2.new(1, 0, 1, 0)
-bg.Parent = screenGui
+local backgroundFrame = Instance.new("Frame")
+backgroundFrame.Name = "Background"
+backgroundFrame.Size = UDim2.new(0, 0, 0, 0)
+backgroundFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
+backgroundFrame.BorderSizePixel = 0
+backgroundFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+backgroundFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 
--- Logo
-local logo = Instance.new("TextLabel")
-logo.Text = "🌀 Rin Hub"
-logo.Font = Enum.Font.FredokaOne
-logo.TextSize = 60
-logo.TextColor3 = Color3.fromRGB(255, 255, 255)
-logo.BackgroundTransparency = 1
-logo.Position = UDim2.new(0.5, -150, 0.3, 0)
-logo.Size = UDim2.new(0, 300, 0, 60)
-logo.Parent = bg
+local backgroundPattern = Instance.new("ImageLabel")
+backgroundPattern.Name = "Pattern"
+backgroundPattern.Size = UDim2.new(1, 0, 1, 0)
+backgroundPattern.BackgroundTransparency = 1
+backgroundPattern.Image = "rbxassetid://6073763717"
+backgroundPattern.ImageTransparency = 0.85
+backgroundPattern.ImageColor3 = Color3.fromRGB(0, 120, 215)
+backgroundPattern.ScaleType = Enum.ScaleType.Tile
+backgroundPattern.TileSize = UDim2.new(0, 200, 0, 200)
 
--- Spinner
-local spinner = Instance.new("Frame")
-spinner.Size = UDim2.new(0, 60, 0, 60)
-spinner.Position = UDim2.new(0.5, -30, 0.6, 0)
-spinner.BackgroundTransparency = 1
-spinner.Parent = bg
+local messageFrame = Instance.new("Frame")
+messageFrame.Name = "MessageFrame"
+messageFrame.Size = UDim2.new(0.8, 0, 0.6, 0)
+messageFrame.BackgroundTransparency = 1
+messageFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+messageFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 
-for i = 1, 8 do
-	local dot = Instance.new("Frame")
-	dot.Size = UDim2.new(0, 10, 0, 10)
-	dot.Position = UDim2.new(0.5, 0, 0.5, 0)
-	dot.AnchorPoint = Vector2.new(0.5, 0.5)
-	dot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	dot.BorderSizePixel = 0
-	dot.Parent = spinner
+local logoImage = Instance.new("ImageLabel")
+logoImage.Name = "Logo"
+logoImage.Size = UDim2.new(0, 150, 0, 150)
+logoImage.BackgroundTransparency = 1
+logoImage.Position = UDim2.new(0.5, 0, 0.3, 0)
+logoImage.AnchorPoint = Vector2.new(0.5, 0.5)
+logoImage.Image = "rbxassetid://6034848748"
+logoImage.ImageTransparency = 1
 
-	local angle = math.rad((360 / 8) * i)
-	local radius = 20
-	local x = math.cos(angle) * radius
-	local y = math.sin(angle) * radius
-	dot.Position = UDim2.new(0.5, x, 0.5, y)
+local messageText = Instance.new("TextLabel")
+messageText.Name = "Message"
+messageText.Size = UDim2.new(1, 0, 0.25, 0)
+messageText.Position = UDim2.new(0, 0, 0.5, 0)
+messageText.BackgroundTransparency = 1
+messageText.Font = Enum.Font.GothamMedium
+messageText.TextScaled = true
+messageText.TextColor3 = Color3.fromRGB(255, 255, 255)
+messageText.TextXAlignment = Enum.TextXAlignment.Left
+messageText.TextYAlignment = Enum.TextYAlignment.Top
+messageText.TextWrapped = true
+messageText.Text = ""
+
+local spinnerFrame = Instance.new("Frame")
+spinnerFrame.Name = "Spinner"
+spinnerFrame.Size = UDim2.new(0, 40, 0, 40)
+spinnerFrame.BackgroundTransparency = 1
+spinnerFrame.Position = UDim2.new(0.5, 0, 0.85, 0)
+spinnerFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+
+local dots = {}
+for i = 1, 4 do
+    local dot = Instance.new("Frame")
+    dot.Name = "Dot" .. i
+    dot.Size = UDim2.new(0, 8, 0, 8)
+    dot.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+    dot.BorderSizePixel = 0
+    dot.AnchorPoint = Vector2.new(0.5, 0.5)
+    
+    local angle = (i - 1) * math.pi / 2
+    local radius = 15
+    local xPos = math.cos(angle) * radius
+    local yPos = math.sin(angle) * radius
+    
+    dot.Position = UDim2.new(0.5, xPos, 0.5, yPos)
+    
+    local cornerRadius = Instance.new("UICorner")
+    cornerRadius.CornerRadius = UDim.new(1, 0)
+    cornerRadius.Parent = dot
+    
+    dots[i] = dot
+    dot.Parent = spinnerFrame
 end
 
--- Spinner rotation
-local runService = game:GetService("RunService")
-local rotation = 0
-local spinning = true
-task.spawn(function()
-	while spinning do
-		rotation = (rotation + 2) % 360
-		spinner.Rotation = rotation
-		wait(0.01)
-	end
-end)
+local mainUI = Instance.new("Frame")
+mainUI.Name = "MainUI"
+mainUI.Size = UDim2.new(0.8, 0, 0.7, 0)
+mainUI.BackgroundColor3 = Color3.fromRGB(20, 24, 35)
+mainUI.Position = UDim2.new(1.5, 0, 0.5, 0)
+mainUI.AnchorPoint = Vector2.new(0.5, 0.5)
+mainUI.BorderSizePixel = 0
+mainUI.Visible = false
 
--- Delay
-wait(4)
-spinning = false
-screenGui:Destroy()
+local mainUIStroke = Instance.new("UIStroke")
+mainUIStroke.Color = Color3.fromRGB(65, 105, 225)
+mainUIStroke.Thickness = 2
+mainUIStroke.Transparency = 0.3
 
--- Rin Hub GUI creation (from your original code)
-local rinHub = Instance.new("ScreenGui")
-rinHub.Name = "RinHub"
-rinHub.Parent = playerGui
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0.02, 0)
 
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 300, 0, 200)
-frame.Position = UDim2.new(0.5, -150, 0.5, -100)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-frame.Parent = rinHub
+local uiGradient = Instance.new("UIGradient")
+uiGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 34, 45)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 24, 35))
+})
+uiGradient.Rotation = 45
 
-local title = Instance.new("TextLabel")
-title.Text = "Rin Hub"
-title.Font = Enum.Font.FredokaOne
-title.TextSize = 24
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.Size = UDim2.new(1, 0, 0, 50)
-title.BackgroundTransparency = 1
-title.Parent = frame
+local accentBar = Instance.new("Frame")
+accentBar.Name = "AccentBar"
+accentBar.Size = UDim2.new(0.2, 0, 0.01, 0)
+accentBar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+accentBar.BorderSizePixel = 0
+accentBar.Position = UDim2.new(0.5, 0, 0.08, 0)
+accentBar.AnchorPoint = Vector2.new(0.5, 0.5)
 
-local btn = Instance.new("TextButton")
-btn.Text = "Do Something"
-btn.Font = Enum.Font.Gotham
-btn.TextSize = 18
-btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-btn.Size = UDim2.new(0, 200, 0, 50)
-btn.Position = UDim2.new(0.5, -100, 0.5, -25)
-btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-btn.Parent = frame
+local accentBarCorner = Instance.new("UICorner")
+accentBarCorner.CornerRadius = UDim.new(1, 0)
 
-btn.MouseButton1Click:Connect(function()
-	print("Button clicked!")
-end)
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Name = "Title"
+titleLabel.Size = UDim2.new(1, 0, 0.13, 0)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Position = UDim2.new(0, 0, 0.13, 0)
+titleLabel.Font = Enum.Font.GothamBlack
+titleLabel.Text = "BLOX FRUITS"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.TextScaled = true
+
+local titleShadow = titleLabel:Clone()
+titleShadow.Name = "TitleShadow"
+titleShadow.TextColor3 = Color3.fromRGB(0, 170, 255)
+titleShadow.TextTransparency = 0.7
+titleShadow.Position = UDim2.new(0, 2, 0.13, 2)
+titleShadow.ZIndex = titleLabel.ZIndex - 1
+
+local subtitleLabel = Instance.new("TextLabel")
+subtitleLabel.Name = "Subtitle"
+subtitleLabel.Size = UDim2.new(0.8, 0, 0.07, 0)
+subtitleLabel.BackgroundTransparency = 1
+subtitleLabel.Position = UDim2.new(0.5, 0, 0.25, 0)
+subtitleLabel.AnchorPoint = Vector2.new(0.5, 0)
+subtitleLabel.Font = Enum.Font.GothamSemibold
+subtitleLabel.Text = "Final Stage of Loading"
+subtitleLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+subtitleLabel.TextScaled = true
+
+local decorativeLine1 = Instance.new("Frame")
+decorativeLine1.Name = "DecoLine1"
+decorativeLine1.Size = UDim2.new(0.2, 0, 0.003, 0)
+decorativeLine1.BackgroundColor3 = Color3.fromRGB(65, 105, 225)
+decorativeLine1.Position = UDim2.new(0.2, 0, 0.35, 0)
+decorativeLine1.BorderSizePixel = 0
+
+local decorativeLine2 = Instance.new("Frame")
+decorativeLine2.Name = "DecoLine2"
+decorativeLine2.Size = UDim2.new(0.2, 0, 0.003, 0)
+decorativeLine2.BackgroundColor3 = Color3.fromRGB(65, 105, 225)
+decorativeLine2.Position = UDim2.new(0.8, 0, 0.35, 0)
+decorativeLine2.AnchorPoint = Vector2.new(1, 0)
+decorativeLine2.BorderSizePixel = 0
+
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Name = "Status"
+statusLabel.Size = UDim2.new(0.8, 0, 0.06, 0)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Position = UDim2.new(0.5, 0, 0.4, 0)
+statusLabel.AnchorPoint = Vector2.new(0.5, 0)
+statusLabel.Font = Enum.Font.GothamMedium
+statusLabel.Text = "Status: Initializing..."
+statusLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
+statusLabel.TextScaled = true
+
+local percentLabel = Instance.new("TextLabel")
+percentLabel.Name = "Percent"
+percentLabel.Size = UDim2.new(0.2, 0, 0.06, 0)
+percentLabel.BackgroundTransparency = 1
+percentLabel.Position = UDim2.new(0.9, 0, 0.55, 0)
+percentLabel.AnchorPoint = Vector2.new(1, 0.5)
+percentLabel.Font = Enum.Font.GothamBold
+percentLabel.Text = "0%"
+percentLabel.TextColor3 = Color3.fromRGB(0, 170, 255)
+percentLabel.TextScaled = true
+
+local progressBarBackground = Instance.new("Frame")
+progressBarBackground.Name = "ProgressBarBg"
+progressBarBackground.Size = UDim2.new(0.8, 0, 0.06, 0)
+progressBarBackground.Position = UDim2.new(0.5, 0, 0.55, 0)
+progressBarBackground.AnchorPoint = Vector2.new(0.5, 0.5)
+progressBarBackground.BackgroundColor3 = Color3.fromRGB(40, 44, 55)
+progressBarBackground.BorderSizePixel = 0
+
+local progressBarStroke = Instance.new("UIStroke")
+progressBarStroke.Color = Color3.fromRGB(65, 105, 225)
+progressBarStroke.Thickness = 1
+progressBarStroke.Transparency = 0.7
+
+local progressBarCorner = Instance.new("UICorner")
+progressBarCorner.CornerRadius = UDim.new(0.5, 0)
+
+local progressBar = Instance.new("Frame")
+progressBar.Name = "ProgressBar"
+progressBar.Size = UDim2.new(0, 0, 1, 0)
+progressBar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+progressBar.BorderSizePixel = 0
+
+local progressBarCorner2 = Instance.new("UICorner")
+progressBarCorner2.CornerRadius = UDim.new(0.5, 0)
+
+local progressGradient = Instance.new("UIGradient")
+progressGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 170, 255)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(65, 105, 225)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 170, 255))
+})
+progressGradient.Offset = Vector2.new(0, 0)
+
+local infoPanel = Instance.new("Frame")
+infoPanel.Name = "InfoPanel"
+infoPanel.Size = UDim2.new(0.8, 0, 0.25, 0)
+infoPanel.Position = UDim2.new(0.5, 0, 0.7, 0)
+infoPanel.AnchorPoint = Vector2.new(0.5, 0)
+infoPanel.BackgroundColor3 = Color3.fromRGB(30, 34, 45)
+infoPanel.BackgroundTransparency = 0.5
+infoPanel.BorderSizePixel = 0
+
+local infoPanelCorner = Instance.new("UICorner")
+infoPanelCorner.CornerRadius = UDim.new(0.05, 0)
+
+local infoPanelStroke = Instance.new("UIStroke")
+infoPanelStroke.Color = Color3.fromRGB(65, 105, 225)
+infoPanelStroke.Thickness = 1
+infoPanelStroke.Transparency = 0.7
+
+local infoTitle = Instance.new("TextLabel")
+infoTitle.Name = "InfoTitle"
+infoTitle.Size = UDim2.new(1, 0, 0.2, 0)
+infoTitle.BackgroundTransparency = 1
+infoTitle.Font = Enum.Font.GothamSemibold
+infoTitle.Text = "LOADING DETAILS"
+infoTitle.TextColor3 = Color3.fromRGB(0, 170, 255)
+infoTitle.TextScaled = true
+
+local infoContent = Instance.new("TextLabel")
+infoContent.Name = "InfoContent"
+infoContent.Size = UDim2.new(0.95, 0, 0.7, 0)
+infoContent.Position = UDim2.new(0.5, 0, 0.25, 0)
+infoContent.AnchorPoint = Vector2.new(0.5, 0)
+infoContent.BackgroundTransparency = 1
+infoContent.Font = Enum.Font.Gotham
+infoContent.Text = "Initializing game components..."
+infoContent.TextColor3 = Color3.fromRGB(200, 200, 200)
+infoContent.TextScaled = true
+infoContent.TextWrapped = true
+infoContent.TextXAlignment = Enum.TextXAlignment.Left
+infoContent.TextYAlignment = Enum.TextYAlignment.Top
+
+local function animateSpinner()
+    local spinSpeed = 2
+    local dotOpacity = {1, 0.7, 0.4, 0.1}
+    
+    return RunService.Heartbeat:Connect(function()
+        if spinnerFrame.Visible then
+            for i = 1, 4 do
+                local dot = dots[i]
+                if dot then
+                    local currentIndex = (i + math.floor(tick() * spinSpeed)) % 4 + 1
+                    dot.BackgroundTransparency = 1 - dotOpacity[currentIndex]
+                end
+            end
+        end
+    end)
+end
+
+local function animateProgressGradient()
+    return RunService.Heartbeat:Connect(function()
+        if progressGradient and mainUI.Visible then
+            progressGradient.Offset = Vector2.new((tick() * 0.2) % 2 - 1, 0)
+        end
+    end)
+end
+
+local function typewriterEffect(text, duration)
+    messageText.Text = ""
+    local textLength = string.len(text)
+    local timePerChar = duration / textLength
+    
+    for i = 1, textLength do
+        messageText.Text = string.sub(text, 1, i)
+        task.wait(timePerChar)
+    end
+end
+
+local function updateProgressBar(percentage)
+    TweenService:Create(progressBar, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+        Size = UDim2.new(percentage / 100, 0, 1, 0)
+    }):Play()
+    percentLabel.Text = string.format("%.0f%%", percentage)
+end
+
+local function updateStatus(status)
+    statusLabel.Text = "Status: " .. status
+end
+
+local function updateInfoContent(info)
+    infoContent.Text = info
+end
+
+local linePool = {}
+local dotPool = {}
+
+local function createOrGetLine()
+    local line = table.remove(linePool)
+    if not line then
+        line = Instance.new("Frame")
+        line.BackgroundColor3 = Color3.fromRGB(65, 105, 225)
+        line.BackgroundTransparency = 0.7
+        line.BorderSizePixel = 0
+    end
+    return line
+end
+
+local function createOrGetDot()
+    local dot = table.remove(dotPool)
+    if not dot then
+        dot = Instance.new("Frame")
+        dot.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+        dot.BackgroundTransparency = 0.8
+        dot.BorderSizePixel = 0
+        
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(1, 0)
+        corner.Parent = dot
+    end
+    return dot
+end
+
+local function returnToPool(item, pool)
+    item.Parent = nil
+    table.insert(pool, item)
+end
+
+local function createBackgroundEffects()
+    local effectsContainer = Instance.new("Frame")
+    effectsContainer.Name = "Effects"
+    effectsContainer.Size = UDim2.new(1, 0, 1, 0)
+    effectsContainer.BackgroundTransparency = 1
+    effectsContainer.ClipsDescendants = true
+    
+    local lines = {}
+    for i = 1, 12 do
+        local line = createOrGetLine()
+        local height = math.random(40, 100)
+        local width = math.random(1, 2)
+        line.Size = UDim2.new(0, width, 0, height)
+        
+        local xPos = math.random(0, 100) / 100
+        local yPos = math.random(0, 100) / 100
+        
+        line.Position = UDim2.new(xPos, 0, yPos, 0)
+        line.Parent = effectsContainer
+        lines[i] = {element = line, xPos = xPos}
+        
+        task.spawn(function()
+            while mainUI.Visible do
+                local duration = math.random(3, 7)
+                local newYPos = math.random(-20, 120) / 100
+                
+                TweenService:Create(line, TweenInfo.new(duration, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+                    Position = UDim2.new(xPos, 0, newYPos, 0),
+                    BackgroundTransparency = math.random(70, 90) / 100
+                }):Play()
+                
+                task.wait(duration)
+            end
+            returnToPool(line, linePool)
+        end)
+    end
+    
+    local dots = {}
+    for i = 1, 15 do
+        local dot = createOrGetDot()
+        local size = math.random(2, 4)
+        dot.Size = UDim2.new(0, size, 0, size)
+        
+        local xPos = math.random(0, 100) / 100
+        local yPos = math.random(0, 100) / 100
+        
+        dot.Position = UDim2.new(xPos, 0, yPos, 0)
+        dot.Parent = effectsContainer
+        dots[i] = {element = dot, xPos = xPos, yPos = yPos}
+        
+        task.spawn(function()
+            local currentXPos = xPos
+            local currentYPos = yPos
+            
+            while mainUI.Visible do
+                local duration = math.random(2, 5)
+                local newXPos = currentXPos + (math.random(-10, 10) / 100)
+                local newYPos = currentYPos + (math.random(-10, 10) / 100)
+                
+                TweenService:Create(dot, TweenInfo.new(duration, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+                    Position = UDim2.new(newXPos, 0, newYPos, 0),
+                    BackgroundTransparency = math.random(70, 90) / 100
+                }):Play()
+                
+                task.wait(duration)
+                
+                currentXPos = newXPos
+                currentYPos = newYPos
+            end
+            returnToPool(dot, dotPool)
+        end)
+    end
+    
+    return effectsContainer
+end
+
+local function disableDefaultUI()
+    pcall(function()
+        StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
+        StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false)
+    end)
+end
+
+local function startLoading()
+    disableDefaultUI()
+    
+    TweenService:Create(backgroundFrame, TweenInfo.new(1, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+        Size = UDim2.new(1, 0, 1, 0)
+    }):Play()
+    
+    task.wait(1)
+    
+    TweenService:Create(logoImage, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        ImageTransparency = 0
+    }):Play()
+    
+    spinnerFrame.Visible = true
+    local spinnerConnection = animateSpinner()
+    
+    task.wait(1.5)
+    
+    local replicaMessages = {
+        "Hello! The script is almost done loading. We just need to do some extra steps",
+        "During the last stage of loading - Please, do NOT leave the game. Or it could result in data loss",
+        "Well yeah. That's all you need to know. Now - Just wait."
+    }
+    
+    for _, message in ipairs(replicaMessages) do
+        typewriterEffect(message, 3)
+        task.wait(4)
+    end
+    
+    task.wait(1)
+    
+    TweenService:Create(logoImage, TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+        ImageTransparency = 1
+    }):Play()
+    
+    task.wait(0.8)
+    
+    messageFrame.Visible = false
+    mainUI.Visible = true
+    
+    local progressGradientConnection = animateProgressGradient()
+    local effectsContainer = createBackgroundEffects()
+    effectsContainer.Parent = mainUI
+    
+    TweenService:Create(mainUI, TweenInfo.new(1, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Position = UDim2.new(0.5, 0, 0.5, 0)
+    }):Play()
+    
+    local loadingSteps = {
+        {
+            status = "Waking up systems...", 
+            info = "- Booting main modules\n- Getting Data\n- Getting stuff ready", 
+            time = 20
+        },
+        {
+            status = "Loading the heavy stuff...", 
+            info = "- Grabbing all those scripts tables\n- Loading the big modules\n- Making sure everything fits\n- Checking for bugs", 
+            time = 35
+        },
+        {
+            status = "Checking connections...", 
+            info = "- Making sure we're online\n- Testing server response\n- Checking your internet\n- Setting up server", 
+            time = 30
+        },
+        {
+            status = "Finding your stuff...", 
+            info = "- Looking for your save data\n- Grabbing your settings\n- Making sure nothing's missing\n- Getting your script ready", 
+            time = 40
+        },
+        {
+            status = "Setting up the main parts...", 
+            info = "- Loading stuff\n- Setting up all the extras\n- Making sure everything works\n- Final testing", 
+            time = 35
+        },
+        {
+            status = "Last few bits...", 
+            info = "- Crossing our t's\n- Dotting our i's\n- Making things smooth\n- Just a moment longer", 
+            time = 25
+        },
+        {
+            status = "We're good to go!", 
+            info = "- Everything's loaded\n- No problems found\n- Let's get started!", 
+            time = 15
+        }
+    }
+    
+    local totalTime = 300
+    local elapsedTime = 0
+    
+    local currentStep = 1
+    local currentStepTime = 0
+    
+    while elapsedTime < totalTime do
+        local step = loadingSteps[currentStep]
+        updateStatus(step.status)
+        updateInfoContent(step.info)
+        
+        currentStepTime = currentStepTime + 1
+        
+        if currentStepTime >= step.time then
+            currentStepTime = 0
+            currentStep = currentStep + 1
+            if currentStep > #loadingSteps then
+                currentStep = #loadingSteps
+            end
+        end
+        
+        local percentage = (elapsedTime / totalTime) * 100
+        updateProgressBar(percentage)
+        
+        task.wait(1)
+        elapsedTime = elapsedTime + 1
+    end
+    
+    updateProgressBar(100)
+    updateStatus("Loading complete!")
+    updateInfoContent("- Script is Loaded!\n- Script is ready\n- Have Fun!")
+    
+    task.wait(2)
+    
+    TweenService:Create(mainUI, TweenInfo.new(1, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+        Position = UDim2.new(1.5, 0, 0.5, 0)
+    }):Play()
+    
+    task.wait(1)
+    
+    TweenService:Create(backgroundFrame, TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        BackgroundTransparency = 1
+    }):Play()
+    
+    TweenService:Create(backgroundPattern, TweenInfo.new(1.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        ImageTransparency = 1
+    }):Play()
+    
+    task.wait(1.5)
+    
+    if spinnerConnection then
+        spinnerConnection:Disconnect()
+    end
+    
+    if progressGradientConnection then
+        progressGradientConnection:Disconnect()
+    end
+    
+    pcall(function()
+        StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, true)
+    end)
+    
+    loadingGui:Destroy()
+end
+
+local function handleResponsiveUI()
+    local function updateUI()
+        local viewportSize = workspace.CurrentCamera.ViewportSize
+        local isPortrait = viewportSize.Y > viewportSize.X
+        
+        if isPortrait then
+            mainUI.Size = UDim2.new(0.95, 0, 0.7, 0)
+            messageFrame.Size = UDim2.new(0.95, 0, 0.7, 0)
+            messageText.TextSize = 20
+            infoContent.TextSize = 16
+        else
+            mainUI.Size = UDim2.new(0.8, 0, 0.7, 0)
+            messageFrame.Size = UDim2.new(0.8, 0, 0.6, 0)
+            messageText.TextSize = 24
+            infoContent.TextSize = 18
+        end
+    end
+    
+    updateUI()
+    workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateUI)
+end
+
+backgroundPattern.Parent = backgroundFrame
+messageFrame.Parent = backgroundFrame
+logoImage.Parent = messageFrame
+messageText.Parent = messageFrame
+spinnerFrame.Parent = messageFrame
+progressBarCorner.Parent = progressBarBackground
+progressBarStroke.Parent = progressBarBackground
+progressBar.Parent = progressBarBackground
+progressBarCorner2.Parent = progressBar
+progressGradient.Parent = progressBar
+backgroundFrame.Parent = loadingGui
+mainUIStroke.Parent = mainUI
+uiCorner.Parent = mainUI
+uiGradient.Parent = mainUI
+accentBarCorner.Parent = accentBar
+accentBar.Parent = mainUI
+titleLabel.Parent = mainUI
+titleShadow.Parent = mainUI
+subtitleLabel.Parent = mainUI
+decorativeLine1.Parent = mainUI
+decorativeLine2.Parent = mainUI
+statusLabel.Parent = mainUI
+percentLabel.Parent = mainUI
+progressBarBackground.Parent = mainUI
+infoPanelCorner.Parent = infoPanel
+infoPanelStroke.Parent = infoPanel
+infoTitle.Parent = infoPanel
+infoContent.Parent = infoPanel
+infoPanel.Parent = mainUI
+mainUI.Parent = loadingGui
+loadingGui.Parent = playerGui
+
+handleResponsiveUI()
+startLoading()
