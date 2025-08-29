@@ -237,4 +237,3 @@ minimizeButton.MouseButton1Click:Connect(function()
 		minimizeButton.Text = "_"
 	end
 end)
-
