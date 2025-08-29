@@ -27,7 +27,7 @@ uiCorner.CornerRadius = UDim.new(0, 12)
 local titleBar = Instance.new("TextLabel")
 titleBar.Size = UDim2.new(1, 0, 0, 30)
 titleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
-titleBar.Text = "⚡ Trade Helper"
+titleBar.Text = "⚡ Rin Script ⚡"
 titleBar.TextColor3 = Color3.fromRGB(255, 255, 255)
 titleBar.Font = Enum.Font.GothamBold
 titleBar.TextSize = 16
@@ -80,8 +80,8 @@ local uiList = Instance.new("UIListLayout", toggleFrame)
 uiList.Padding = UDim.new(0, 8)
 
 local toggles = {
-	"Freeze Trade",
-	"Add Fruit"
+	"Freeze Trade: ",
+	"Auto Accept: "
 }
 
 local toggleStates = {}
@@ -118,7 +118,7 @@ local function createToggle(name)
 	button.MouseButton1Click:Connect(function()
 		local inTrade, victim = checkTradeStatus()
 		if not inTrade then
-			showWarning("You need to be in trade")
+			showWarning("You need to be in trade!")
 			return
 		end
 
@@ -183,7 +183,7 @@ RunService.Heartbeat:Connect(function()
 		statusLabel.Text = "Victim: " .. victim
 		statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
 	else
-		statusLabel.Text = "Not in trade"
+		statusLabel.Text = "Status: Not in trade"
 		statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
 	end
 end)
