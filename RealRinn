@@ -1,0 +1,195 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- UI setup
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "TradeHelperUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
+
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 250, 0, 300)
+main.Position = UDim2.new(0.5, -125, 0.5, -150)
+main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+main.BorderSizePixel = 0
+main.Active = true
+main.Draggable = false -- handled manually for pc + mobile
+main.Parent = screenGui
+
+-- UICorner + stroke
+local corner = Instance.new("UICorner", main)
+corner.CornerRadius = UDim.new(0, 10)
+local stroke = Instance.new("UIStroke", main)
+stroke.Thickness = 2
+stroke.Color = Color3.fromRGB(100, 100, 255)
+
+-- title bar
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 30)
+titleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+titleBar.BorderSizePixel = 0
+titleBar.Parent = main
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, -60, 1, 0)
+titleLabel.Position = UDim2.new(0, 10, 0, 0)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "Trade Helper"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextSize = 16
+titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+titleLabel.Parent = titleBar
+
+-- status label
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(1, -20, 0, 25)
+statusLabel.Position = UDim2.new(0, 10, 0, 35)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "Status: Not in trade"
+statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.TextSize = 14
+statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+statusLabel.Parent = main
+
+-- container
+local contentFrame = Instance.new("Frame")
+contentFrame.Size = UDim2.new(1, -20, 1, -70)
+contentFrame.Position = UDim2.new(0, 10, 0, 65)
+contentFrame.BackgroundTransparency = 1
+contentFrame.Parent = main
+
+local layout = Instance.new("UIListLayout", contentFrame)
+layout.Padding = UDim.new(0, 8)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+-- toggles table (Block Scam removed!)
+local toggles = {
+    {Name = "Freeze Trade"},
+    {Name = "Auto Accept"},
+    {Name = "Add Best Fruit"},
+}
+
+-- notification popup
+local function showNotification(msg)
+    local note = Instance.new("TextLabel")
+    note.Size = UDim2.new(1, 0, 0, 30)
+    note.Position = UDim2.new(0, 0, 1, -40)
+    note.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    note.TextColor3 = Color3.fromRGB(255, 100, 100)
+    note.Font = Enum.Font.GothamBold
+    note.TextSize = 14
+    note.Text = msg
+    note.Parent = main
+    local c = Instance.new("UICorner", note)
+    c.CornerRadius = UDim.new(0, 8)
+
+    task.delay(2, function()
+        note:Destroy()
+    end)
+end
+
+-- checkTradeStatus (fixed victim name)
+local function checkTradeStatus()
+    local playerGui = player:WaitForChild("PlayerGui")
+    local mainGui = playerGui:FindFirstChild("Main")
+    if not mainGui then return false, "" end
+
+    local tradeFrame = mainGui:FindFirstChild("Trade")
+    if not tradeFrame or not tradeFrame.Visible then return false, "" end
+
+    local container = tradeFrame:FindFirstChild("Container")
+    if not container then return false, "" end
+
+    local frame1 = container:FindFirstChild("1")
+    local frame2 = container:FindFirstChild("2")
+    if not frame1 or not frame2 then return false, "" end
+
+    local player1Label = frame1:FindFirstChild("TextLabel")
+    local player2Label = frame2:FindFirstChild("TextLabel")
+    if not player1Label or not player2Label then return false, "" end
+
+    local player1Text = player1Label.Text
+    local player2Text = player2Label.Text
+
+    local localName = string.lower(player.Name)
+    local localDisplay = string.lower(player.DisplayName)
+    local p1Lower = string.lower(player1Text)
+    local p2Lower = string.lower(player2Text)
+
+    if p1Lower == localName or p1Lower == localDisplay then
+        return true, player2Text
+    elseif p2Lower == localName or p2Lower == localDisplay then
+        return true, player1Text
+    else
+        return false, ""
+    end
+end
+
+-- create toggle buttons
+for _, data in ipairs(toggles) do
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 0, 30)
+    btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.Gotham
+    btn.TextSize = 14
+    btn.Text = data.Name .. ": OFF"
+    btn.Parent = contentFrame
+
+    local on = false
+    btn.MouseButton1Click:Connect(function()
+        local inTrade, victim = checkTradeStatus()
+        if not inTrade then
+            showNotification("You need to be in trade")
+            return
+        end
+        on = not on
+        btn.Text = data.Name .. ": " .. (on and "ON" or "OFF")
+        btn.BackgroundColor3 = on and Color3.fromRGB(80, 160, 80) or Color3.fromRGB(45, 45, 45)
+    end)
+end
+
+-- heartbeat loop for status
+game:GetService("RunService").Heartbeat:Connect(function()
+    local inTrade, victim = checkTradeStatus()
+    if inTrade then
+        statusLabel.Text = "Status: Victim - " .. victim
+    else
+        statusLabel.Text = "Status: Not in trade"
+    end
+end)
+
+-- draggable (PC + Mobile)
+do
+    local dragging, dragStart, startPos
+    local function update(input)
+        local delta = input.Position - dragStart
+        main.Position = UDim2.new(
+            startPos.X.Scale, startPos.X.Offset + delta.X,
+            startPos.Y.Scale, startPos.Y.Offset + delta.Y
+        )
+    end
+    titleBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = main.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            update(input)
+        end
+    end)
+end
