@@ -1,0 +1,277 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Gui Setup
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "TradeHelperUI"
+screenGui.Parent = playerGui
+
+local main = Instance.new("Frame")
+main.Size = UDim2.new(0, 260, 0, 60)
+main.Position = UDim2.new(0.5, -130, 0.5, -30)
+main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+main.BorderSizePixel = 0
+main.Active = true
+main.Draggable = false
+main.Parent = screenGui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 12)
+corner.Parent = main
+
+local stroke = Instance.new("UIStroke")
+stroke.Color = Color3.fromRGB(80, 80, 80)
+stroke.Thickness = 2
+stroke.Parent = main
+
+-- Title bar
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 28)
+titleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+titleBar.BorderSizePixel = 0
+titleBar.Parent = main
+
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 12)
+titleCorner.Parent = titleBar
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -60, 1, 0)
+title.Position = UDim2.new(0, 10, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "⚡ Trade Helper"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 14
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = titleBar
+
+-- Buttons
+local minimizeButton = Instance.new("TextButton")
+minimizeButton.Size = UDim2.new(0, 24, 0, 24)
+minimizeButton.Position = UDim2.new(1, -54, 0.5, -12)
+minimizeButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+minimizeButton.Text = "-"
+minimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimizeButton.Font = Enum.Font.GothamBold
+minimizeButton.TextSize = 14
+minimizeButton.Parent = titleBar
+
+local exitButton = Instance.new("TextButton")
+exitButton.Size = UDim2.new(0, 24, 0, 24)
+exitButton.Position = UDim2.new(1, -26, 0.5, -12)
+exitButton.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+exitButton.Text = "×"
+exitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+exitButton.Font = Enum.Font.GothamBold
+exitButton.TextSize = 14
+exitButton.Parent = titleBar
+
+for _, button in ipairs({minimizeButton, exitButton}) do
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, 6)
+    c.Parent = button
+end
+
+-- Content frame
+local contentFrame = Instance.new("Frame")
+contentFrame.Size = UDim2.new(1, -20, 0, 0)
+contentFrame.Position = UDim2.new(0, 10, 0, 34)
+contentFrame.BackgroundTransparency = 1
+contentFrame.ClipsDescendants = true
+contentFrame.Parent = main
+
+-- Add layout (auto adjust)
+local layout = Instance.new("UIListLayout")
+layout.Padding = UDim.new(0, 8)
+layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.Parent = contentFrame
+
+-- Functions
+local function updateContentFrameSize()
+    local totalHeight = 0
+    for _, child in ipairs(contentFrame:GetChildren()) do
+        if child:IsA("Frame") then
+            totalHeight += child.Size.Y.Offset + layout.Padding.Offset
+        end
+    end
+    TweenService:Create(main, TweenInfo.new(0.25), {Size = UDim2.new(0, 260, 0, 34 + totalHeight + 10)}):Play()
+    contentFrame.Size = UDim2.new(1, -20, 0, totalHeight)
+end
+
+local function createToggle(text)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, 0, 0, 28)
+    frame.BackgroundTransparency = 1
+    frame.Parent = contentFrame
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -50, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.TextColor3 = Color3.fromRGB(220, 220, 220)
+    label.Font = Enum.Font.Gotham
+    label.TextSize = 13
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = frame
+
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0, 40, 0, 20)
+    button.Position = UDim2.new(1, -40, 0.5, -10)
+    button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    button.Text = ""
+    button.AutoButtonColor = false
+    button.Parent = frame
+
+    local bcorner = Instance.new("UICorner")
+    bcorner.CornerRadius = UDim.new(0, 10)
+    bcorner.Parent = button
+
+    local indicator = Instance.new("Frame")
+    indicator.Size = UDim2.new(0, 16, 0, 16)
+    indicator.Position = UDim2.new(0, 2, 0.5, -8)
+    indicator.BackgroundColor3 = Color3.fromRGB(120, 120, 120)
+    indicator.Parent = button
+
+    local icorner = Instance.new("UICorner")
+    icorner.CornerRadius = UDim.new(0, 8)
+    icorner.Parent = indicator
+
+    local state = false
+
+    local function setState(newState)
+        state = newState
+        if state then
+            TweenService:Create(indicator, TweenInfo.new(0.25), {
+                Position = UDim2.new(1, -18, 0.5, -8),
+                BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+            }):Play()
+        else
+            TweenService:Create(indicator, TweenInfo.new(0.25), {
+                Position = UDim2.new(0, 2, 0.5, -8),
+                BackgroundColor3 = Color3.fromRGB(120, 120, 120)
+            }):Play()
+        end
+    end
+
+    return button, setState
+end
+
+-- Notification Function
+local function showNotification(message)
+    local notif = Instance.new("TextLabel")
+    notif.Size = UDim2.new(0, 220, 0, 35)
+    notif.Position = UDim2.new(0.5, -110, 0.1, 0)
+    notif.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    notif.TextColor3 = Color3.fromRGB(255, 255, 255)
+    notif.Text = message
+    notif.Font = Enum.Font.GothamBold
+    notif.TextScaled = true
+    notif.BackgroundTransparency = 0.1
+    notif.TextStrokeTransparency = 0.5
+    notif.Parent = screenGui
+    notif.ZIndex = 10
+    notif.AnchorPoint = Vector2.new(0.5, 0)
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = notif
+
+    TweenService:Create(notif, TweenInfo.new(0.3), {BackgroundTransparency = 0.1, TextTransparency = 0}):Play()
+    task.delay(2, function()
+        TweenService:Create(notif, TweenInfo.new(0.5), {BackgroundTransparency = 1, TextTransparency = 1}):Play()
+        task.delay(0.5, function()
+            notif:Destroy()
+        end)
+    end)
+end
+
+-- Dummy checkTradeStatus
+local function checkTradeStatus()
+    -- Palitan mo logic dito depende sa trade detection mo
+    -- For now, return false para matest notification
+    return false
+end
+
+local function toggleWithCheck(func)
+    if not checkTradeStatus() then
+        showNotification("You need to be in trade")
+        return
+    end
+    func()
+end
+
+-- Toggles
+local freezeBtn, setFreeze = createToggle("Freeze Trade")
+freezeBtn.MouseButton1Click:Connect(function()
+    toggleWithCheck(function()
+        setFreeze(true) -- Example logic
+    end)
+end)
+
+local acceptBtn, setAccept = createToggle("Auto Accept")
+acceptBtn.MouseButton1Click:Connect(function()
+    toggleWithCheck(function()
+        setAccept(true)
+    end)
+end)
+
+local declineBtn, setDecline = createToggle("Auto Decline")
+declineBtn.MouseButton1Click:Connect(function()
+    toggleWithCheck(function()
+        setDecline(true)
+    end)
+end)
+
+updateContentFrameSize()
+
+-- Buttons behavior
+minimizeButton.MouseButton1Click:Connect(function()
+    if contentFrame.Visible then
+        contentFrame.Visible = false
+        TweenService:Create(main, TweenInfo.new(0.25), {Size = UDim2.new(0, 260, 0, 34)}):Play()
+    else
+        contentFrame.Visible = true
+        updateContentFrameSize()
+    end
+end)
+
+exitButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+-- Dragging
+local dragging, dragInput, dragStart, startPos
+
+titleBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = main.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+titleBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+                                  startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
