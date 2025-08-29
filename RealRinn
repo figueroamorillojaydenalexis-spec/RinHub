@@ -1,0 +1,182 @@
+-- Trade Helper UI (Improved + Victim Display)
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Remove old GUI if exists
+if playerGui:FindFirstChild("TradeHelperUI") then
+    playerGui.TradeHelperUI:Destroy()
+end
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "TradeHelperUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
+
+-- Main Frame
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 280, 0, 220)
+mainFrame.Position = UDim2.new(0.5, -140, 0.5, -110)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = screenGui
+
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 12)
+
+-- Shadow
+local shadow = Instance.new("ImageLabel", mainFrame)
+shadow.AnchorPoint = Vector2.new(0.5,0.5)
+shadow.Position = UDim2.new(0.5,0,0.5,0)
+shadow.Size = UDim2.new(1,20,1,20)
+shadow.ZIndex = -1
+shadow.BackgroundTransparency = 1
+shadow.Image = "rbxassetid://1316045217"
+shadow.ImageTransparency = 0.3
+
+-- Title Bar
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 28)
+titleBar.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+titleBar.BorderSizePixel = 0
+titleBar.Parent = mainFrame
+Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0, 12)
+
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, -30, 1, 0)
+titleLabel.Position = UDim2.new(0, 10, 0, 0)
+titleLabel.Text = "⚡ Trade Helper"
+titleLabel.Font = Enum.Font.GothamBold
+titleLabel.TextSize = 16
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.BackgroundTransparency = 1
+titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+titleLabel.Parent = titleBar
+
+-- Status Label
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(1, -20, 0, 22)
+statusLabel.Position = UDim2.new(0, 10, 0, 35)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "Not in trade"
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.TextSize = 14
+statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+statusLabel.Parent = mainFrame
+
+-- Toggle Container
+local toggleContainer = Instance.new("Frame")
+toggleContainer.Size = UDim2.new(1, -20, 1, -70)
+toggleContainer.Position = UDim2.new(0, 10, 0, 65)
+toggleContainer.BackgroundTransparency = 1
+toggleContainer.Parent = mainFrame
+
+local UIListLayout = Instance.new("UIListLayout", toggleContainer)
+UIListLayout.Padding = UDim.new(0, 8)
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+-- Toggles
+local toggles = {"Freeze Trade", "Add Fruit"}
+local toggleStates = {}
+local toggleButtons = {}
+
+local function createToggle(name)
+    local toggleFrame = Instance.new("Frame")
+    toggleFrame.Size = UDim2.new(1, 0, 0, 30)
+    toggleFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    toggleFrame.Parent = toggleContainer
+    Instance.new("UICorner", toggleFrame).CornerRadius = UDim.new(0, 8)
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -50, 1, 0)
+    label.Position = UDim2.new(0, 10, 0, 0)
+    label.Text = name
+    label.Font = Enum.Font.Gotham
+    label.TextSize = 14
+    label.TextColor3 = Color3.fromRGB(220, 220, 220)
+    label.BackgroundTransparency = 1
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = toggleFrame
+
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0, 40, 0, 20)
+    button.Position = UDim2.new(1, -45, 0.5, -10)
+    button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    button.Text = "OFF"
+    button.Font = Enum.Font.GothamBold
+    button.TextSize = 12
+    button.TextColor3 = Color3.fromRGB(180, 180, 180)
+    button.Parent = toggleFrame
+    Instance.new("UICorner", button).CornerRadius = UDim.new(1, 0)
+
+    toggleStates[name] = false
+    toggleButtons[name] = button
+
+    button.MouseButton1Click:Connect(function()
+        if not button.Active then return end -- disabled kapag hindi trade
+        toggleStates[name] = not toggleStates[name]
+        if toggleStates[name] then
+            button.Text = "ON"
+            button.TextColor3 = Color3.fromRGB(0, 255, 100)
+            button.BackgroundColor3 = Color3.fromRGB(30, 90, 30)
+        else
+            button.Text = "OFF"
+            button.TextColor3 = Color3.fromRGB(180, 180, 180)
+            button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        end
+    end)
+end
+
+for _, name in ipairs(toggles) do
+    createToggle(name)
+end
+
+-- Trade Checker
+local function checkTradeStatus()
+    local mainGui = playerGui:FindFirstChild("Main")
+    if not mainGui then return false, "" end
+
+    local tradeFrame = mainGui:FindFirstChild("Trade")
+    if not tradeFrame or not tradeFrame.Visible then return false, "" end
+
+    local container = tradeFrame:FindFirstChild("Container")
+    if not container then return false, "" end
+
+    -- victim name = 2nd player (hindi ikaw)
+    for _, child in ipairs(container:GetChildren()) do
+        if child:IsA("Frame") and child:FindFirstChild("Name") then
+            local nameLabel = child.Name
+            if nameLabel ~= player.Name then
+                return true, nameLabel
+            end
+        end
+    end
+
+    return false, ""
+end
+
+-- Update loop
+RunService.RenderStepped:Connect(function()
+    local inTrade, victimName = checkTradeStatus()
+    if inTrade then
+        statusLabel.Text = "Victim: " .. (victimName ~= "" and victimName or "Unknown")
+        -- enable toggles
+        for _, btn in pairs(toggleButtons) do
+            btn.Active = true
+            btn.AutoButtonColor = true
+            btn.BackgroundTransparency = 0
+        end
+    else
+        statusLabel.Text = "Not in trade"
+        -- disable toggles
+        for _, btn in pairs(toggleButtons) do
+            btn.Active = false
+            btn.AutoButtonColor = false
+            btn.BackgroundTransparency = 0.4
+        end
+    end
+end)
