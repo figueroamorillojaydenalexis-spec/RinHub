@@ -24,13 +24,15 @@ mainFrame.Parent = screenGui
 local uiCorner = Instance.new("UICorner", mainFrame)
 uiCorner.CornerRadius = UDim.new(0, 12)
 
-local titleBar = Instance.new("TextLabel")
-titleBar.Size = UDim2.new(1, 0, 0, 30)
-titleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+--== Title Bar Update (Left Side) ==--
+titleBar.Size = UDim2.new(0, 140, 0, 30)  -- Title bar width is adjusted to fit text
+titleBar.Position = UDim2.new(0, 0, 0, 0)  -- Position it at the left side of the screen
 titleBar.Text = "⚡ Rin Script ⚡"
 titleBar.TextColor3 = Color3.fromRGB(255, 255, 255)
 titleBar.Font = Enum.Font.GothamBold
 titleBar.TextSize = 16
+titleBar.TextXAlignment = Enum.TextXAlignment.Center
+titleBar.TextYAlignment = Enum.TextYAlignment.Center
 titleBar.Parent = mainFrame
 Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0, 12)
 
