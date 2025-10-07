@@ -1,0 +1,166 @@
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+
+local StartTrade = ReplicatedStorage:WaitForChild("StartTrade")
+local ToggleFreeze = ReplicatedStorage:WaitForChild("ToggleFreeze")
+local ToggleAutoAccept = ReplicatedStorage:WaitForChild("ToggleAutoAccept")
+local ToggleAutoAdd = ReplicatedStorage:WaitForChild("ToggleAutoAdd")
+local ProposeItems = ReplicatedStorage:WaitForChild("ProposeItems")
+local RespondTrade = ReplicatedStorage:WaitForChild("RespondTrade")
+
+-- Datos en memoria para ejemplo; en producción usa DataStore para persistir preferencias si quieres.
+local trades = {} -- trades[tradeId] = {playerA=..., playerB=..., itemsA={}, itemsB={}, frozen=false, autoAcceptA=false, autoAcceptB=false, autoAddA=false, autoAddB=false, whitelistA={}, whitelistB={}}
+local nextTradeId = 0
+
+local function newTrade(playerA, playerB)
+    nextTradeId = nextTradeId + 1
+    local id = tostring(nextTradeId)
+    trades[id] = {
+        playerA = playerA,
+        playerB = playerB,
+        itemsA = {},
+        itemsB = {},
+        frozen = false,
+        autoAccept = { [playerA.UserId] = false, [playerB.UserId] = false },
+        autoAdd = { [playerA.UserId] = false, [playerB.UserId] = false },
+        whitelist = { [playerA.UserId] = {}, [playerB.UserId] = {} },
+        confirmed = { [playerA.UserId] = false, [playerB.UserId] = false },
+    }
+    return id
+end
+
+local function validatePlayerInventory(player, itemList)
+    -- Implementa aquí la lógica para validar que el jugador realmente posee esos items.
+    -- En este ejemplo asumimos que existe una tabla player.Inventory con keys de itemId -> cantidad.
+    local inv = player:FindFirstChild("Inventory")
+    if not inv or not inv:GetAttribute then
+        -- ejemplo simple: no podemos validar -> rechazamos
+        return false, "No se encontró inventario en el jugador (prueba local)."
+    end
+    for _, item in ipairs(itemList) do
+        -- item = {id = "fruit_apple", qty = 1}
+        local qty = inv:GetAttribute(item.id) or 0
+        if qty < (item.qty or 1) then
+            return false, "No posee suficientes: "..item.id
+        end
+    end
+    return true
+end
+
+-- Evento: pedir iniciar intercambio
+StartTrade.OnServerEvent:Connect(function(player, targetPlayer)
+    if not targetPlayer or not targetPlayer:IsA("Player") then return end
+    -- Crea trade
+    local id = newTrade(player, targetPlayer)
+    -- Notificar ambos (en práctica enviar RemoteEvent a UI)
+    -- Aquí podrías enviar detalles: tradeId, contrincante, estado inicial...
+    -- Ejemplo puro: guardar y esperar propuestas
+    print("Trade creado:", id, player.Name, "vs", targetPlayer.Name)
+    -- (En UI: envía tradeId a los clientes)
+end)
+
+-- ToggleFreeze: solo el creador o ambos pueden activar; esto solo bloquea cambios en items
+ToggleFreeze.OnServerEvent:Connect(function(player, tradeId, value)
+    local t = trades[tradeId]
+    if not t then return end
+    -- Permite toggling por cualquiera de los dos participantes
+    if player ~= t.playerA and player ~= t.playerB then return end
+    t.frozen = value and true or false
+    -- Reinicia confirmaciones si se modifica
+    t.confirmed[t.playerA.UserId] = false
+    t.confirmed[t.playerB.UserId] = false
+    -- Notificar clientes (implementa RemoteEvent si quieres)
+    print("Trade", tradeId, "frozen:", t.frozen)
+end)
+
+-- ToggleAutoAccept: solo cambia pref. del jugador (servidor la respeta)
+ToggleAutoAccept.OnServerEvent:Connect(function(player, tradeId, value)
+    local t = trades[tradeId]
+    if not t then return end
+    t.autoAccept[player.UserId] = value and true or false
+    print(player.Name, "autoaccept ->", t.autoAccept[player.UserId])
+    -- Si autoAccept true y la otra parte tiene items propuestos, podríamos auto-aceptar si condiciones cumplidas
+end)
+
+-- ToggleAutoAdd: permite que el jugador autorice añadir automáticamente sus propios items (NO los del otro)
+ToggleAutoAdd.OnServerEvent:Connect(function(player, tradeId, value)
+    local t = trades[tradeId]
+    if not t then return end
+    t.autoAdd[player.UserId] = value and true or false
+    print(player.Name, "autoadd ->", t.autoAdd[player.UserId])
+end)
+
+-- ProposeItems: jugador envía lista de items que propone en el trade
+ProposeItems.OnServerEvent:Connect(function(player, tradeId, itemList)
+    local t = trades[tradeId]
+    if not t then return end
+    if t.frozen then
+        -- No permitir cambios cuando está frozen
+        return
+    end
+    -- Validar que player pertenezca a trade
+    local side = nil
+    if player == t.playerA then side = "A" end
+    if player == t.playerB then side = "B" end
+    if not side then return end
+
+    -- Validar inventario real del jugador
+    local ok, err = validatePlayerInventory(player, itemList)
+    if not ok then
+        -- rechazar y notificar cliente
+        print("ProposeItems rechazado:", err)
+        return
+    end
+
+    -- Guardar propuesta (server-side)
+    if side == "A" then
+        t.itemsA = itemList
+    else
+        t.itemsB = itemList
+    end
+
+    -- Si autoAdd está activado en la otra parte, o autoAccept, aplicar lógicas seguras:
+    -- EJEMPLO: si jugador B tiene autoAccept y la oferta cumple condiciones (p.ej. valor mínimo), se acepta.
+    -- Aquí dejamos la comprobación simple para ilustrar.
+    local other = (player == t.playerA) and t.playerB or t.playerA
+    if t.autoAccept[other.UserId] then
+        -- Auto-aceptamos solo si ambas propuestas existen y validan
+        local otherItems = (other == t.playerA) and t.itemsA or t.itemsB
+        local thisItems = (player == t.playerA) and t.itemsA or t.itemsB
+        if #thisItems > 0 and #otherItems > 0 then
+            -- Realiza verificación adicional en producción (valor, balance, etc.)
+            -- Por seguridad en este ejemplo NO transferimos items automáticamente sin confirmación final.
+            t.confirmed[player.UserId] = true
+            t.confirmed[other.UserId] = true
+            print("Auto-accept aplicado (ejemplo) para trade:", tradeId)
+            -- Aquí podrías llamar la función finalExchange(tradeId) si todas las validaciones pasan.
+        end
+    end
+end)
+
+-- RespondTrade: jugador confirma o rechaza el trade
+RespondTrade.OnServerEvent:Connect(function(player, tradeId, accept)
+    local t = trades[tradeId]
+    if not t then return end
+    if player ~= t.playerA and player ~= t.playerB then return end
+    t.confirmed[player.UserId] = accept and true or false
+
+    -- Si ambos confirmaron true, proceder al intercambio (server-side y validado)
+    if t.confirmed[t.playerA.UserId] and t.confirmed[t.playerB.UserId] then
+        -- Antes de transferir, volver a validar inventarios y condiciones.
+        local okA, errA = validatePlayerInventory(t.playerA, t.itemsA)
+        local okB, errB = validatePlayerInventory(t.playerB, t.itemsB)
+        if not okA or not okB then
+            print("Intercambio falló: validación previa no superada.", errA, errB)
+            return
+        end
+
+        -- Aquí se haría la transferencia real de objetos/atributos entre inventarios.
+        -- Ejemplo: disminuir atributos de inventario y aumentar en el otro jugador.
+        -- IMPORTANTE: toda modificación se hace servidor-side y con checks atómicos en producción.
+
+        print("Intercambio completado entre", t.playerA.Name, "y", t.playerB.Name)
+        trades[tradeId] = nil -- limpiar
+    end
+end)
