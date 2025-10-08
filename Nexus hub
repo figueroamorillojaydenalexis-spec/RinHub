@@ -1,0 +1,74 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+-- Crear GUI principal
+local gui = Instance.new("ScreenGui")
+gui.Name = "TradeDemoGUI"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 320, 0, 250)
+frame.Position = UDim2.new(0.5, -160, 0.5, -125)
+frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+frame.BorderSizePixel = 0
+frame.Parent = gui
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 40)
+title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+title.Text = "💱 Trade System (Demo)"
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 22
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Parent = frame
+
+local status = Instance.new("TextLabel")
+status.Size = UDim2.new(1, -20, 0, 25)
+status.Position = UDim2.new(0, 10, 0, 50)
+status.BackgroundTransparency = 1
+status.Text = "Estado: listo"
+status.Font = Enum.Font.SourceSans
+status.TextSize = 18
+status.TextColor3 = Color3.fromRGB(200, 200, 200)
+status.TextXAlignment = Enum.TextXAlignment.Left
+status.Parent = frame
+
+local function makeButton(text, y)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(1, -20, 0, 40)
+	btn.Position = UDim2.new(0, 10, 0, y)
+	btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+	btn.TextColor3 = Color3.new(1, 1, 1)
+	btn.Font = Enum.Font.SourceSansBold
+	btn.TextSize = 18
+	btn.Text = text
+	btn.Parent = frame
+	return btn
+end
+
+local b1 = makeButton("Enviar Solicitud (Demo)", 90)
+local b2 = makeButton("Aceptar Trade (Demo)", 140)
+local b3 = makeButton("Cancelar Trade (Demo)", 190)
+
+-- Simulación simple
+b1.MouseButton1Click:Connect(function()
+	status.Text = "Solicitaste un trade (ejemplo)"
+	b1.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+	wait(1)
+	b1.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+end)
+
+b2.MouseButton1Click:Connect(function()
+	status.Text = "Trade aceptado (simulado)"
+	b2.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+	wait(1)
+	b2.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+end)
+
+b3.MouseButton1Click:Connect(function()
+	status.Text = "Trade cancelado (demo)"
+	b3.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+	wait(1)
+	b3.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+end)
