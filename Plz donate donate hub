@@ -1,0 +1,149 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+``lua name=DonateServer.lua
+-- Place: ServerScriptService (Script)
+-- Server-side donation handler.
+-- Enforces validation, cooldowns, and adjusts leaderstats Money values.
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local DONATE_EVENT = ReplicatedStorage:WaitForChild("DonateEvent")
+
+-- Config
+local MIN_DONATION = 1           -- smallest allowed donation
+local MAX_DONATION = 1e7         -- safety cap
+local DONATION_COOLDOWN = 2      -- seconds between donations per donor
+local STARTING_MONEY = 1000      -- starting leaderstats money for new players
+
+-- Runtime state
+local lastDonationAt = {}        -- [userId] = os.time() or tick()
+local locks = {}                 -- simple per-user lock to avoid races: [userId] = true
+
+-- Helper: ensure leaderstats Money exists
+local function createLeaderstats(player)
+    local leaderstats = player:FindFirstChild("leaderstats")
+    if not leaderstats then
+        leaderstats = Instance.new("Folder")
+        leaderstats.Name = "leaderstats"
+        leaderstats.Parent = player
+    end
+
+    local money = leaderstats:FindFirstChild("Money")
+    if not money then
+        money = Instance.new("IntValue")
+        money.Name = "Money"
+        money.Value = STARTING_MONEY
+        money.Parent = leaderstats
+    end
+
+    return money
+end
+
+-- Simple lock helper to prevent concurrent modifications for a user
+local function acquireLock(userId)
+    while locks[userId] do
+        task.wait(0.01)
+    end
+    locks[userId] = true
+end
+
+local function releaseLock(userId)
+    locks[userId] = nil
+end
+
+-- Validates and processes a donation request
+DONATE_EVENT.OnServerEvent:Connect(function(donorPlayer, targetUserId, amount, message)
+    -- Basic type checks (defensive)
+    if typeof(targetUserId) ~= "number" or typeof(amount) ~= "number" then
+        -- invalid call
+        return
+    end
+
+    -- Prevent donating to self
+    if donorPlayer.UserId == targetUserId then
+        DONATE_EVENT:FireClient(donorPlayer, false, "You cannot donate to yourself.")
+        return
+    end
+
+    -- Validate amount
+    if amount ~= math.floor(amount) then
+        DONATE_EVENT:FireClient(donorPlayer, false, "Donation amount must be a whole number.")
+        return
+    end
+    if amount < MIN_DONATION then
+        DONATE_EVENT:FireClient(donorPlayer, false, "Minimum donation is " .. MIN_DONATION .. ".")
+        return
+    end
+    if amount > MAX_DONATION then
+        DONATE_EVENT:FireClient(donorPlayer, false, "Donation exceeds the allowed maximum.")
+        return
+    end
+
+    -- Cooldown
+    local now = os.time()
+    local last = lastDonationAt[donorPlayer.UserId] or 0
+    if now - last < DONATION_COOLDOWN then
+        DONATE_EVENT:FireClient(donorPlayer, false, "You're donating too fast. Please wait a moment.")
+        return
+    end
+
+    -- Find target player object
+    local targetPlayer = nil
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p.UserId == targetUserId then
+            targetPlayer = p
+            break
+        end
+    end
+    if not targetPlayer then
+        DONATE_EVENT:FireClient(donorPlayer, false, "That player is not in the server.")
+        return
+    end
+
+    -- Acquire locks to safely update balances
+    acquireLock(donorPlayer.UserId)
+    acquireLock(targetPlayer.UserId)
+
+    -- Ensure leaderstats exist
+    local donorMoney = createLeaderstats(donorPlayer)
+    local targetMoney = createLeaderstats(targetPlayer)
+
+    -- Check donor has enough funds
+    if donorMoney.Value < amount then
+        releaseLock(targetPlayer.UserId)
+        releaseLock(donorPlayer.UserId)
+        DONATE_EVENT:FireClient(donorPlayer, false, "You don't have enough money.")
+        return
+    end
+
+    -- Perform transfer
+    donorMoney.Value = donorMoney.Value - amount
+    targetMoney.Value = targetMoney.Value + amount
+
+    -- Update last donation time
+    lastDonationAt[donorPlayer.UserId] = now
+
+    -- Release locks
+    releaseLock(targetPlayer.UserId)
+    releaseLock(donorPlayer.UserId)
+
+    -- Notify donor of success and optionally notify recipient
+    DONATE_EVENT:FireClient(donorPlayer, true, ("You donated %d to %s"):format(amount, targetPlayer.Name))
+    DONATE_EVENT:FireClient(targetPlayer, true, ("You received %d from %s"):format(amount, donorPlayer.Name))
+
+    -- Server log
+    print(("[Donation] %s -> %s : %d -- message: %s"):format(donorPlayer.Name, targetPlayer.Name, amount, tostring(message)))
+end)
+
+-- Set up leaderstats for players when they join
+Players.PlayerAdded:Connect(function(player)
+    createLeaderstats(player)
+end)
+
+-- For already-present players (if script is added while players are in)
+for _, p in ipairs(Players:GetPlayers()) do
+    createLeaderstats(p)
+end
+
+print("[DonateServer] Server donation handler initialized.")
