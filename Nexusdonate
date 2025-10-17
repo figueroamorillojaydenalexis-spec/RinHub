@@ -1,0 +1,130 @@
+local HOP_DELAY = 5 -- seconds between hops
+
+--// SERVICES
+local TeleportService = game:GetService("TeleportService")
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+
+--// GUI CREATION
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "NexusHub"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 260, 0, 160)
+frame.Position = UDim2.new(0.5, -130, 0.5, -80)
+frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+frame.Parent = screenGui
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 10)
+corner.Parent = frame
+
+-- Title
+local title = Instance.new("TextLabel")
+title.Text = "NexusHub"
+title.Size = UDim2.new(1, 0, 0, 30)
+title.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.Parent = frame
+
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 10)
+titleCorner.Parent = title
+
+-- Buttons
+local autohopButton = Instance.new("TextButton")
+autohopButton.Size = UDim2.new(1, -20, 0, 45)
+autohopButton.Position = UDim2.new(0, 10, 0, 45)
+autohopButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+autohopButton.Text = "Autohop Server: OFF"
+autohopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+autohopButton.Font = Enum.Font.Gotham
+autohopButton.TextSize = 16
+autohopButton.Parent = frame
+
+local hopCorner = Instance.new("UICorner")
+hopCorner.CornerRadius = UDim.new(0, 6)
+hopCorner.Parent = autohopButton
+
+local donateButton = Instance.new("TextButton")
+donateButton.Size = UDim2.new(1, -20, 0, 45)
+donateButton.Position = UDim2.new(0, 10, 0, 100)
+donateButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+donateButton.Text = "Auto Donate"
+donateButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+donateButton.Font = Enum.Font.Gotham
+donateButton.TextSize = 16
+donateButton.Parent = frame
+
+local donateCorner = Instance.new("UICorner")
+donateCorner.CornerRadius = UDim.new(0, 6)
+donateCorner.Parent = donateButton
+
+--// AUTOHOP FUNCTION
+local autohopEnabled = false
+
+local function findNewServer()
+	local servers = {}
+	local success, result = pcall(function()
+		local response = game:HttpGetAsync(
+			"https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
+		)
+		return HttpService:JSONDecode(response)
+	end)
+	if success and result and result.data then
+		for _, s in ipairs(result.data) do
+			if s.playing < s.maxPlayers and s.id ~= game.JobId then
+				table.insert(servers, s.id)
+			end
+		end
+	end
+	return #servers > 0 and servers[math.random(1, #servers)] or nil
+end
+
+autohopButton.MouseButton1Click:Connect(function()
+	autohopEnabled = not autohopEnabled
+	autohopButton.Text = "Autohop Server: " .. (autohopEnabled and "ON" or "OFF")
+
+	if autohopEnabled then
+		task.spawn(function()
+			while autohopEnabled do
+				local newServer = findNewServer()
+				if newServer then
+					TeleportService:TeleportToPlaceInstance(game.PlaceId, newServer, player)
+				end
+				task.wait(HOP_DELAY)
+			end
+		end)
+	end
+end)
+
+--// AUTO DONATE FUNCTION (with animation)
+donateButton.MouseButton1Click:Connect(function()
+	local message = Instance.new("TextLabel")
+	message.Size = UDim2.new(1, 0, 0, 25)
+	message.Position = UDim2.new(0, 0, 1, 0)
+	message.Text = "💸 Donation completed!"
+	message.TextColor3 = Color3.fromRGB(0, 255, 0)
+	message.BackgroundTransparency = 1
+	message.Font = Enum.Font.Gotham
+	message.TextSize = 14
+	message.Parent = frame
+
+	-- Animate slide up and fade out
+	local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+	local goal = {Position = UDim2.new(0, 0, 1, -30), TextTransparency = 1}
+	local tween = TweenService:Create(message, tweenInfo, goal)
+	tween:Play()
+	game:GetService("Debris"):AddItem(message, 1)
+end)
+
+print("✅ NexusHub loaded (Autohop + Auto Donate)")
