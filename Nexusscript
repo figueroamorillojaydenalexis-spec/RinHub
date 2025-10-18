@@ -1,0 +1,133 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+
+-- Remote objects
+local rfName = "Nexus_GetNearbyResources"   -- RemoteFunction devuelve lista de {id, pos}
+local reName = "Nexus_CollectResource"     -- RemoteEvent para pedir recolección
+
+local remoteFunc = ReplicatedStorage:FindFirstChild(rfName)
+if not remoteFunc then
+    remoteFunc = Instance.new("RemoteFunction")
+    remoteFunc.Name = rfName
+    remoteFunc.Parent = ReplicatedStorage
+end
+
+local remoteEvent = ReplicatedStorage:FindFirstChild(reName)
+if not remoteEvent then
+    remoteEvent = Instance.new("RemoteEvent")
+    remoteEvent.Name = reName
+    remoteEvent.Parent = ReplicatedStorage
+end
+
+-- Resource template
+local RESOURCE_TEMPLATE = Instance.new("Part")
+RESOURCE_TEMPLATE.Size = Vector3.new(2,2,2)
+RESOURCE_TEMPLATE.Anchored = true
+RESOURCE_TEMPLATE.CanCollide = false
+RESOURCE_TEMPLATE.Name = "NexusFruitResource"
+
+-- spawn positions (ajusta a tu mapa)
+local spawnPositions = {
+    Vector3.new(0,5,0),
+    Vector3.new(12,5,-6),
+    Vector3.new(-10,5,8),
+    Vector3.new(22,5,4),
+    Vector3.new(-18,5,-10),
+}
+
+local resources = {} -- id -> {part, value, posIndex}
+local nextId = 1
+
+local function createResourceAt(pos, posIndex)
+    local part = RESOURCE_TEMPLATE:Clone()
+    part.Position = pos
+    part.BrickColor = BrickColor.Random()
+    part.Parent = workspace
+    part.Name = "NexusFruitResource"
+
+    local idVal = Instance.new("IntValue")
+    idVal.Name = "ResourceId"
+    idVal.Value = nextId
+    idVal.Parent = part
+
+    resources[nextId] = { part = part, value = math.random(5,20), posIndex = posIndex }
+    nextId = nextId + 1
+end
+
+-- initial spawn
+for i, pos in ipairs(spawnPositions) do
+    createResourceAt(pos, i)
+end
+
+local function respawnAtPosIndex(posIndex)
+    wait(math.random(8,16))
+    local pos = spawnPositions[posIndex]
+    createResourceAt(pos, posIndex)
+end
+
+-- leaderstats coins
+Players.PlayerAdded:Connect(function(player)
+    local leaderstats = Instance.new("Folder")
+    leaderstats.Name = "leaderstats"
+    leaderstats.Parent = player
+
+    local coins = Instance.new("IntValue")
+    coins.Name = "Coins"
+    coins.Value = 0
+    coins.Parent = leaderstats
+end)
+
+-- RemoteFunction: devuelve recursos cercanos a la posición enviada por cliente (servidor filtra por distancia)
+-- Parámetros: player, position (Vector3), maxRange number
+remoteFunc.OnServerInvoke = function(player, position, maxRange)
+    if typeof(position) ~= "Vector3" or type(maxRange) ~= "number" then
+        return {}
+    end
+    local found = {}
+    for id, rec in pairs(resources) do
+        local part = rec.part
+        if part and part.Parent then
+            local dist = (position - part.Position).Magnitude
+            if dist <= maxRange then
+                table.insert(found, { id = id, pos = part.Position })
+            end
+        end
+    end
+    return found
+end
+
+-- RemoteEvent: cliente solicita recoger resourceId; servidor valida distancia y otorga reward
+remoteEvent.OnServerEvent:Connect(function(player, resourceId)
+    if type(resourceId) ~= "number" then return end
+    local record = resources[resourceId]
+    if not record then return end
+    local part = record.part
+    if not part or not part.Parent then return end
+
+    local character = player.Character
+    if not character then return end
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    -- Validar distancia real (20 studs)
+    local dist = (hrp.Position - part.Position).Magnitude
+    if dist > 20 then
+        return
+    end
+
+    -- otorgar monedas
+    local coins = player:FindFirstChild("leaderstats") and player.leaderstats:FindFirstChild("Coins")
+    if coins then
+        coins.Value = coins.Value + record.value
+    end
+
+    local posIndex = record.posIndex
+    -- limpiar
+    resources[resourceId] = nil
+    part:Destroy()
+
+    -- respawn
+    spawn(function()
+        respawnAtPosIndex(posIndex)
+    end)
+end)
