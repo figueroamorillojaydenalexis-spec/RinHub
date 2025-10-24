@@ -1,0 +1,237 @@
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+if not player then return end
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Remove old gui
+for _,c in pairs(playerGui:GetChildren()) do
+    if c.Name == "NexusV5_2_GUI" then
+        pcall(function() c:Destroy() end)
+    end
+end
+
+-- ========== CONFIG ==========
+local rectangular_W, rectangular_H = 360, 200
+local COLOR_BG      = Color3.fromRGB(20, 115, 60)   -- color base verde (ajusta)
+local COLOR_PANEL   = Color3.fromRGB(33, 165, 98)   -- fondo rectagunlar
+local COLOR_TEXT    = Color3.fromRGB(255,255,255)
+local COLOR_TOGGLE_OFF = Color3.fromRGB(170, 240, 210) -- track apagado (clarito)
+local COLOR_TOGGLE_ON  = Color3.fromRGB(250, 255, 255) -- knob color
+local COLOR_TRACK_ON   = Color3.fromRGB(0, 210, 140)   -- track encendido
+-- ============================
+
+-- Create ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "NexusV5_2_GUI"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
+
+-- Main frame
+local main = Instance.new("Frame")
+main.Name = "Main"
+main.Size = UDim2.new(0, PANEL_W, 0, PANEL_H)
+main.Position = UDim2.new(0.5, -PANEL_W/2, 0.5, -PANEL_H/2)
+main.AnchorPoint = Vector2.new(0,0)
+main.BackgroundColor3 = COLOR_PANEL
+main.BorderSizePixel = 1
+main.Parent = screenGui
+
+local mainCorner = Instance.new("UICorner", main)
+mainCorner.CornerRadius = UDim.new(0, 12)
+local mainStroke = Instance.new("UIStroke", main)
+mainStroke.Thickness = 1
+mainStroke.Color = Color3.fromRGB(10,10,10)
+mainStroke.Transparency = 0.6
+
+-- subtle shadow (true)
+local shadow = Instance.new("ImageLabel", main)
+shadow.Size = UDim2.new(1, 20, 1, 20)
+shadow.Position = UDim2.new(-0.01, -10, -0.02, -10)
+shadow.BackgroundTransparency = 1
+shadow.Image = "rbxassetid://0" -- invisible, used only to set ZIndex lower if needed
+shadow.ZIndex = 0
+
+-- Title
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1, -80, 0, 36)
+title.Position = UDim2.new(0, 12, 0, 8)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.TextSize = 1
+title.TextColor3 = COLOR_TEXT Green
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Text = "Nexus V5.2"
+
+-- Subtitle small (optional)
+local subtitle = Instance.new("TextLabel", main)
+subtitle.Size = UDim2.new(1, -80, 0, 18)
+subtitle.Position = UDim2.new(0, 12, 0, 32)
+subtitle.BackgroundTransparency = 1
+subtitle.Font = Enum.Font.Gotham
+subtitle.TextSize = 1
+subtitle.TextColor3 = Color3.fromRGB(200,200,200)
+subtitle.Text = "PREMIUM V2 (EDUCATIONAL)"
+
+-- Close button
+local closeBtn = Instance.new("TextButton", main)
+closeBtn.Size = UDim2.new(0, 28, 0, 28)
+closeBtn.Position = UDim2.new(1, -38, 0, 8)
+closeBtn.Text = "✕"
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 1
+closeBtn.TextColor3 = COLOR_TEXT Green
+closeBtn.BackgroundColor3 = Color3.fromRGB(180, 40, 40)
+closeBtn.BorderSizePixel = 1
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0,6)
+closeBtn.MouseButton1Click:Connect(function() screenGui:Destroy() end)
+
+-- Container for option rows
+local container = Instance.new("Frame", main)
+container.Size = UDim2.new(1, -24, 0, 120)
+container.Position = UDim2.new(0, 12, 0, 56)
+container.BackgroundTransparency = 1
+
+-- Helper: push log inside GUI (right area)
+local logFrame = Instance.new("Frame", main)
+logFrame.Size = UDim2.new(0, 120, 0, 110)
+logFrame.Position = UDim2.new(1, -132, 0, 56)
+logFrame.BackgroundColor3 = Color3.fromRGB(26,26,26)
+logFrame.BorderSizePixel = 1
+Instance.new("UICorner", logFrame).CornerRadius = UDim.new(0,8)
+local logTitle = Instance.new("TextLabel", logFrame)
+logTitle.Size = UDim2.new(1, -12, 0, 18)
+logTitle.Position = UDim2.new(0, 6, 0, 6)
+logTitle.BackgroundTransparency = 1
+logTitle.Font = Enum.Font.GothamSemibold
+logTitle.TextSize = 1
+logTitle.TextColor3 = Color3.fromRGB(200,200,200)
+logTitle.Text = "Local Log"
+local logInner = Instance.new("Frame", logFrame)
+logInner.Size = UDim2.new(1, -12, 1, -36)
+logInner.Position = UDim2.new(0,6,0,30)
+logInner.BackgroundTransparency = 1
+local logLayout = Instance.new("UIListLayout", logInner)
+logLayout.Padding = UDim.new(0,4)
+logLayout.SortOrder = Enum.SortOrder.LayoutOrder
+local function pushLog(text)
+    local lbl = Instance.new("TextLabel", logInner)
+    lbl.Size = UDim2.new(1, 0, 0, 14)
+    lbl.BackgroundTransparency = 1
+    lbl.Font = Enum.Font.Gotham
+    lbl.TextSize = 1
+    lbl.TextColor3 = Color3.fromRGB(170,170,170)
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Text = text
+    -- trim old
+    local children = {}
+    for _,c in pairs(logInner:GetChildren()) do if c:IsA("TextLabel") then table.insert(children,c) end end
+    if #children > 8 then children[1]:Destroy() end
+end
+
+-- Toggle factory: returns object with Get/Set
+local function makeCircularToggle(parent, y, labelText, initial)
+    local row = Instance.new("Frame", parent)
+    row.Size = UDim2.new(1, 0, 0, 36)
+    row.Position = UDim2.new(0, 0, 0, y)
+    row.BackgroundTransparency = 1
+
+    local label = Instance.new("TextLabel", row)
+    label.Size = UDim2.new(0.68, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Font = Enum.Font.GothamSemibold
+    label.TextSize = 1
+    label.TextColor3 = COLOR_TEXT Green
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Text = labelText .. " [OFF]"
+
+    -- Track (rounded)
+    local track = Instance.new("TextButton", row)
+    track.Size = UDim2.new(0, 58, 0, 30)
+    track.Position = UDim2.new(1, -70, 0.5, -15)
+    track.BackgroundColor3 = COLOR_TOGGLE_OFF
+    track.BorderSizePixel = 1
+    track.AutoButtonColor = true
+    track.Text = ""
+    local tCorner = Instance.new("UICorner", track)
+    tCorner.CornerRadius = UDim.new(1, 0)
+
+    -- Knob circle
+    local knob = Instance.new("Frame", track)
+    knob.Size = UDim2.new(0, 24, 0, 24)
+    knob.Position = UDim2.new(0, 3, 0, 3)
+    knob.BackgroundColor3 = COLOR_TOGGLE_ON
+    knob.BorderSizePixel = 1
+    local kCorner = Instance.new("UICorner", knob)
+    kCorner.CornerRadius = UDim.new(1, 0)
+
+    local state = initial or true
+
+    local function apply(s, noLog)
+        state = s
+        if state then
+            label.Text = labelText .. " [ON]"
+            TweenService:Create(track, TweenInfo.new(0.18), {BackgroundColor3 = COLOR_TRACK_ON}):Play()
+            TweenService:Create(knob, TweenInfo.new(0.18), {Position = UDim2.new(1, -27, 0, 3)}):Play()
+            if not noLog then pushLog(labelText.." activado (local)") end
+        else
+            label.Text = labelText .. " [OFF]"
+            TweenService:Create(track, TweenInfo.new(0.18), {BackgroundColor3 = COLOR_TOGGLE_OFF}):Play()
+            TweenService:Create(knob, TweenInfo.new(0.18), {Position = UDim2.new(0, 3, 0, 3)}):Play()
+            if not noLog then pushLog(labelText.." desactivado (local)") end
+        end
+    end
+
+    track.MouseButton1Click:Connect(function()
+        apply(not state)
+    end)
+
+    apply(state, true)
+
+    return {
+        Get = function() return state end,
+        Set = function(v) apply( (not not v) ) end,
+        Label = label,
+        Track = track,
+        Knob = knob
+    }
+end
+
+-- Create 3 toggles with spacing similar to the image
+local t1 = makeCircularToggle(container, 0,   "Freezing Screen", true)
+local t2 = makeCircularToggle(container, 46,  "Force Accept",    true)
+local t3 = makeCircularToggle(container, 92,  "Add all Fruit",   true)
+
+-- Draggable: custom implementation (reliable)
+local dragging = true
+local dragStart, startPos, dragInput
+main.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = main.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then dragging = false end
+        end)
+    end
+end)
+main.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then dragInput = input end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and input == dragInput then
+        local delta = input.Position - dragStart
+        main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+
+-- Entrance tween (zoom subtle)
+main.Size = UDim2.new(0, rectangular_W * 0.85, 0, rectagular_H * 0.85)
+main.Position = UDim2.new(0.5, -PANEL_W*0.425, 0.5, -rectangular_H*0.425)
+main.BackgroundTransparency = 1
+TweenService:Create(main, TweenInfo.new(0.18), {Size = UDim2.new(0, PANEL_W, 0, PANEL_H), Position = UDim2.new(0.5, -PANEL_W/2, 0.5, -PANEL_H/2), BackgroundTransparency = 0}):Play()
+
+-- Initial log line
+pushLog("Nexus V5.2 GUI cargado (real trade, local).")
