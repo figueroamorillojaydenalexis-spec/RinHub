@@ -1,0 +1,352 @@
+local HttpService = game:GetService("HttpService")
+local RunService = game:GetService("RunService")
+
+local Nexus = {}
+Nexus.__index = Nexus
+
+Nexus.DefaultSettings = {
+	Theme = "dark", -- "dark" or "light"
+	ThemeColor = {R=42, G=137, B=255}, -- base color (used in dark mode header)
+	LockFps = { Enabled = true, FPS = 60 },
+	WhiteScreen = false,
+	AutoChat = { Enabled = false, Text = "" },
+	ResetTeleport = { Enabled = false, DelayReset = 3 }
+}
+
+local function make(class, props)
+	local inst = Instance.new(class)
+	if props then
+		for k,v in pairs(props) do inst[k] = v end
+	end
+	return inst
+end
+
+function Nexus.new(player)
+	local self = setmetatable({}, Nexus)
+	self.player = player
+	self.playerGui = player:WaitForChild("PlayerGui")
+	self.settings = HttpService:JSONDecode(HttpService:JSONEncode(Nexus.DefaultSettings))
+	self._savedTeleport = nil
+	self._screenGui = nil
+	self._runtimeBound = false
+	self:LoadSession()
+	return self
+end
+
+-- Session load/save (StringValue in PlayerGui)
+function Nexus:LoadSession()
+	local sv = self.playerGui:FindFirstChild("NexusHub_Settings")
+	if sv and sv:IsA("StringValue") then
+		local ok, data = pcall(function() return HttpService:JSONDecode(sv.Value) end)
+		if ok and type(data) == "table" then
+			self.settings = data
+		end
+	end
+end
+
+function Nexus:SaveSession()
+	local sv = self.playerGui:FindFirstChild("NexusHub_Settings")
+	if not sv then
+		sv = make("StringValue", {Name = "NexusHub_Settings", Parent = self.playerGui})
+	end
+	sv.Value = HttpService:JSONEncode(self.settings)
+end
+
+-- small helper: apply theme colors
+function Nexus:_applyThemeToFrame(frame)
+	if not frame then return end
+	local t = self.settings.Theme or "dark"
+	if t == "dark" then
+		frame.BackgroundColor3 = Color3.fromRGB(self.settings.ThemeColor.R, self.settings.ThemeColor.G, self.settings.ThemeColor.B)
+	else
+		frame.BackgroundColor3 = Color3.fromRGB(240,240,245)
+	end
+end
+
+-- notifier
+function Nexus:_notify(text, dur)
+	dur = dur or 2
+	if not self._screenGui then return end
+	local n = make("TextLabel", {
+		Parent = self._screenGui,
+		Size = UDim2.new(0, 360, 0, 44),
+		Position = UDim2.new(0.5, -180, 0.9, 0),
+		BackgroundColor3 = Color3.fromRGB(20,20,20),
+		TextColor3 = Color3.fromRGB(245,245,245),
+		Text = text,
+		Font = Enum.Font.Gotham,
+		TextSize = 14,
+		AnchorPoint = Vector2.new(0.5,0.5),
+		ZIndex = 1000
+	})
+	make("UICorner", {Parent = n, CornerRadius = UDim.new(0,8)})
+	delay(dur, function() if n and n.Parent then n:Destroy() end end)
+end
+
+-- Build GUI
+function Nexus:BuildGui()
+	-- reload session values
+	self:LoadSession()
+
+	if self.playerGui:FindFirstChild("NexusHub_v2") then
+		self.playerGui.NexusHub_v2:Destroy()
+	end
+
+	local screenGui = make("ScreenGui", {Name = "NexusHub_v2", ResetOnSpawn = false, Parent = self.playerGui})
+	self._screenGui = screenGui
+
+	-- main window
+	local main = make("Frame", {
+		Name = "Main",
+		Parent = screenGui,
+		Size = UDim2.new(0,520,0,520),
+		Position = UDim2.new(0.5, -260, 0.5, -260),
+		AnchorPoint = Vector2.new(0.5,0.5),
+		BorderSizePixel = 0
+	})
+	make("UICorner", {Parent = main, CornerRadius = UDim.new(0,12)})
+	self:_applyThemeToFrame(main)
+
+	-- header
+	local header = make("Frame", {Parent = main, Size = UDim2.new(1,0,0,56), BackgroundTransparency = 1})
+	make("TextLabel", {Parent = header, Size = UDim2.new(1,0,1,0), BackgroundTransparency = 1, Text = "Nexus Hub EDU v2", Font = Enum.Font.GothamBold, TextSize = 20, TextColor3 = Color3.fromRGB(245,245,245)})
+
+	-- close and theme button
+	local closeBtn = make("TextButton", {Parent = main, Text = "X", Size = UDim2.new(0,40,0,28), Position = UDim2.new(1,-48,0,12), BackgroundColor3 = Color3.fromRGB(30,30,30), Font = Enum.Font.GothamBold, TextColor3 = Color3.fromRGB(255,255,255)})
+	make("UICorner", {Parent = closeBtn, CornerRadius = UDim.new(0,8)})
+	closeBtn.MouseButton1Click:Connect(function() main.Visible = false end)
+
+	local themeBtn = make("TextButton", {Parent = main, Text = self.settings.Theme == "dark" and "Modo: Oscuro" or "Modo: Claro", Size = UDim2.new(0,120,0,28), Position = UDim2.new(0,8,0,12), BackgroundColor3 = Color3.fromRGB(30,30,30), Font = Enum.Font.GothamBold, TextColor3 = Color3.fromRGB(255,255,255)})
+	make("UICorner", {Parent = themeBtn, CornerRadius = UDim.new(0,8)})
+	themeBtn.MouseButton1Click:Connect(function()
+		if self.settings.Theme == "dark" then
+			self.settings.Theme = "light"
+			themeBtn.Text = "Modo: Claro"
+		else
+			self.settings.Theme = "dark"
+			themeBtn.Text = "Modo: Oscuro"
+		end
+		self:_applyThemeToFrame(main)
+		self:SaveSession()
+	end)
+
+	-- left tab buttons
+	local tabContainer = make("Frame", {Parent = main, Size = UDim2.new(0,140,1,-76), Position = UDim2.new(0,12,0,64), BackgroundTransparency = 1})
+	local tabs = {"General","Simulación","Teleports","Configuración"}
+	for i,name in ipairs(tabs) do
+		local btn = make("TextButton", {Parent = tabContainer, Size = UDim2.new(1,0,0,40), Position = UDim2.new(0,0,0,(i-1)*46), Text = name, Font = Enum.Font.GothamBold, TextSize = 14, BackgroundColor3 = Color3.fromRGB(28,28,30), TextColor3 = Color3.fromRGB(230,230,230)})
+		make("UICorner", {Parent = btn, CornerRadius = UDim.new(0,8)})
+	end
+
+	-- content area
+	local content = make("Frame", {Parent = main, Size = UDim2.new(1,-176,1,-86), Position = UDim2.new(0,164,0,64), BackgroundTransparency = 1})
+	-- create pages
+	local pages = {}
+	for _,name in ipairs(tabs) do
+		local p = make("Frame", {Parent = content, Size = UDim2.new(1,0,1,0), BackgroundTransparency = 1, Visible = false})
+		p.Name = name
+		p.ClipsDescendants = true
+		pages[name] = p
+	end
+	pages["General"].Visible = true
+
+	-- Fill General page
+	do
+		local p = pages["General"]
+		local function label(y,text) make("TextLabel", {Parent=p, Size = UDim2.new(1,0,0,20), Position = UDim2.new(0,0,0,y), BackgroundTransparency = 1, Text = text, Font = Enum.Font.GothamMedium, TextSize = 14, TextColor3 = Color3.fromRGB(235,235,235), TextXAlignment = Enum.TextXAlignment.Left}) end
+		label(0, "General - opciones simuladas")
+		-- FPS toggle & slider
+		local fpsToggle = make("TextButton", {Parent=p, Size = UDim2.new(0,150,0,28), Position = UDim2.new(0,0,0,34), Text = self.settings.LockFps.Enabled and "FPS: ON" or "FPS: OFF", Font = Enum.Font.GothamBold})
+		make("UICorner", {Parent = fpsToggle, CornerRadius = UDim.new(0,6)})
+		fpsToggle.MouseButton1Click:Connect(function()
+			self.settings.LockFps.Enabled = not self.settings.LockFps.Enabled
+			fpsToggle.Text = self.settings.LockFps.Enabled and "FPS: ON" or "FPS: OFF"
+			self:SaveSession()
+		end)
+		-- FPS slider (simple +/-)
+		local fpsLabel = make("TextLabel", {Parent=p, Size = UDim2.new(0,120,0,20), Position = UDim2.new(0,0,0,68), BackgroundTransparency = 1, Text = "FPS: "..tostring(self.settings.LockFps.FPS), Font = Enum.Font.Gotham, TextSize = 14})
+		local minus = make("TextButton", {Parent=p, Size = UDim2.new(0,28,0,24), Position = UDim2.new(0,130,0,64), Text = "-", Font = Enum.Font.GothamBold})
+		local plus = make("TextButton", {Parent=p, Size = UDim2.new(0,28,0,24), Position = UDim2.new(0,164,0,64), Text = "+", Font = Enum.Font.GothamBold})
+		minus.MouseButton1Click:Connect(function()
+			self.settings.LockFps.FPS = math.max(15, self.settings.LockFps.FPS - 1)
+			fpsLabel.Text = "FPS: "..tostring(self.settings.LockFps.FPS)
+			self:SaveSession()
+		end)
+		plus.MouseButton1Click:Connect(function()
+			self.settings.LockFps.FPS = math.min(240, self.settings.LockFps.FPS + 1)
+			fpsLabel.Text = "FPS: "..tostring(self.settings.LockFps.FPS)
+			self:SaveSession()
+		end)
+
+		-- AutoChat
+		local autoChatToggle = make("TextButton", {Parent=p, Size = UDim2.new(0,150,0,28), Position = UDim2.new(0,0,0,100), Text = self.settings.AutoChat.Enabled and "AutoChat: ON" or "AutoChat: OFF", Font = Enum.Font.GothamBold})
+		make("UICorner", {Parent = autoChatToggle, CornerRadius = UDim.new(0,6)})
+		autoChatToggle.MouseButton1Click:Connect(function()
+			self.settings.AutoChat.Enabled = not self.settings.AutoChat.Enabled
+			autoChatToggle.Text = self.settings.AutoChat.Enabled and "AutoChat: ON" or "AutoChat: OFF"
+			self:SaveSession()
+		end)
+		local chatBox = make("TextBox", {Parent=p, Size = UDim2.new(1, -160,0,28), Position = UDim2.new(0, 160, 0, 100), Text = self.settings.AutoChat.Text or "", PlaceholderText = "Texto AutoChat (demo)", Font = Enum.Font.Gotham})
+		chatBox.FocusLost:Connect(function()
+			self.settings.AutoChat.Text = chatBox.Text
+			self:SaveSession()
+		end)
+	end
+
+	-- Fill Simulación page
+	do
+		local p = pages["Simulación"]
+		make("TextLabel", {Parent=p, Size = UDim2.new(1,0,0,20), Position = UDim2.new(0,0,0,0), BackgroundTransparency = 1, Text = "Herramientas simuladas (solo EDU)", Font = Enum.Font.GothamMedium, TextSize = 14, TextColor3 = Color3.fromRGB(235,235,235)})
+		local btn1 = make("TextButton", {Parent=p, Size = UDim2.new(0,220,0,38), Position = UDim2.new(0,0,0,34), Text = "Simular 'Buscar Rare Items'", Font = Enum.Font.GothamBold})
+		make("UICorner", {Parent = btn1, CornerRadius = UDim.new(0,8)})
+		btn1.MouseButton1Click:Connect(function() self:_notify("Simulación: Searching rares... (demo)", 3) end)
+
+		local btn2 = make("TextButton", {Parent=p, Size = UDim2.new(0,220,0,38), Position = UDim2.new(0,0,0,82), Text = "Simular AutoSummon (demo)", Font = Enum.Font.GothamBold})
+		make("UICorner", {Parent = btn2, CornerRadius = UDim.new(0,8)})
+		btn2.MouseButton1Click:Connect(function() self:_notify("Simulación: AutoSummon triggered (demo).", 3) end)
+	end
+
+	-- Fill Teleports page
+	do
+		local p = pages["Teleports"]
+		make("TextLabel", {Parent=p, Size = UDim2.new(1,0,0,20), Position = UDim2.new(0,0,0,0), BackgroundTransparency = 1, Text = "Teleports (local seguro)", Font = Enum.Font.GothamMedium, TextSize = 14})
+		local saveBtn = make("TextButton", {Parent=p, Size = UDim2.new(0,260,0,34), Position = UDim2.new(0,0,0,34), Text = "Guardar Ubicación Actual", Font = Enum.Font.GothamBold})
+		make("UICorner", {Parent = saveBtn, CornerRadius = UDim.new(0,8)})
+		saveBtn.MouseButton1Click:Connect(function()
+			local char = self.player.Character
+			if char and char.PrimaryPart then
+				self._savedTeleport = char.PrimaryPart.CFrame
+				self:_notify("Ubicación guardada (local).", 2)
+			else
+				self:_notify("Personaje no listo.", 2)
+			end
+		end)
+		local gotoBtn = make("TextButton", {Parent=p, Size = UDim2.new(0,260,0,34), Position = UDim2.new(0,0,0,78), Text = "Ir a Ubicación Guardada", Font = Enum.Font.GothamBold})
+		make("UICorner", {Parent = gotoBtn, CornerRadius = UDim.new(0,8)})
+		gotoBtn.MouseButton1Click:Connect(function()
+			local char = self.player.Character
+			if self._savedTeleport and char and char:SetPrimaryPartCFrame then
+				pcall(function() char:SetPrimaryPartCFrame(self._savedTeleport) end)
+				self:_notify("Movido a ubicación guardada (local).", 2)
+			else
+				self:_notify("No hay ubicación guardada.", 2)
+			end
+		end)
+	end
+
+	-- Fill Configuración page (export/import + theme color)
+	do
+		local p = pages["Configuración"]
+		make("TextLabel", {Parent=p, Size = UDim2.new(1,0,0,20), Position = UDim2.new(0,0,0,0), BackgroundTransparency = 1, Text = "Configuración", Font = Enum.Font.GothamMedium, TextSize = 14})
+		-- Theme color inputs (RGB)
+		local rBox = make("TextBox", {Parent=p, Size = UDim2.new(0,80,0,28), Position = UDim2.new(0,0,0,34), Text = tostring(self.settings.ThemeColor.R), PlaceholderText = "R", Font = Enum.Font.Gotham})
+		local gBox = make("TextBox", {Parent=p, Size = UDim2.new(0,80,0,28), Position = UDim2.new(0,90,0,34), Text = tostring(self.settings.ThemeColor.G), PlaceholderText = "G", Font = Enum.Font.Gotham})
+		local bBox = make("TextBox", {Parent=p, Size = UDim2.new(0,80,0,28), Position = UDim2.new(0,180,0,34), Text = tostring(self.settings.ThemeColor.B), PlaceholderText = "B", Font = Enum.Font.Gotham})
+		local applyColor = make("TextButton", {Parent=p, Size = UDim2.new(0,100,0,28), Position = UDim2.new(0,270,0,34), Text = "Aplicar color", Font = Enum.Font.GothamBold})
+		make("UICorner", {Parent = applyColor, CornerRadius = UDim.new(0,6)})
+		applyColor.MouseButton1Click:Connect(function()
+			local r = tonumber(rBox.Text) or self.settings.ThemeColor.R
+			local g = tonumber(gBox.Text) or self.settings.ThemeColor.G
+			local b = tonumber(bBox.Text) or self.settings.ThemeColor.B
+			self.settings.ThemeColor = {R = math.clamp(math.floor(r),0,255), G = math.clamp(math.floor(g),0,255), B = math.clamp(math.floor(b),0,255)}
+			self:_applyThemeToFrame(main)
+			self:SaveSession()
+			self:_notify("Color aplicado.", 2)
+		end)
+
+		-- Export (shows JSON to copy)
+		local exportBtn = make("TextButton", {Parent=p, Size = UDim2.new(0,140,0,34), Position = UDim2.new(0,0,0,80), Text = "Exportar configuración", Font = Enum.Font.GothamBold})
+		make("UICorner", {Parent = exportBtn, CornerRadius = UDim.new(0,6)})
+		local exportBox = make("TextBox", {Parent=p, Size = UDim2.new(1,0,0,120), Position = UDim2.new(0,0,0,124), Text = "", MultiLine = true, ClearTextOnFocus = false, TextWrapped = true, PlaceholderText = "Aquí aparecerá el JSON exportado. Copia y guarda en un archivo si quieres."})
+		exportBox.TextEditable = true
+		exportBtn.MouseButton1Click:Connect(function()
+			local ok, out = pcall(function() return HttpService:JSONEncode(self.settings) end)
+			if ok then
+				exportBox.Text = out
+				self:_notify("JSON generado — cópialo desde el cuadro.", 3)
+			else
+				self:_notify("Error generando JSON.", 2)
+			end
+		end)
+
+		-- Import (paste JSON into box then press Import)
+		local importBtn = make("TextButton", {Parent=p, Size = UDim2.new(0,100,0,32), Position = UDim2.new(0,0,0,250), Text = "Importar JSON", Font = Enum.Font.GothamBold})
+		make("UICorner", {Parent = importBtn, CornerRadius = UDim.new(0,6)})
+		importBtn.MouseButton1Click:Connect(function()
+			local txt = exportBox.Text
+			local ok, data = pcall(function() return HttpService:JSONDecode(txt) end)
+			if ok and type(data) == "table" then
+				-- validate minimal structure then apply
+				if data.Theme and data.ThemeColor and data.LockFps then
+					self.settings = data
+					self:SaveSession()
+					-- rebuild UI to reflect changes
+					self._screenGui:Destroy()
+					self:BuildGui()
+					self:StartRuntime()
+					self:_notify("Importación exitosa.", 3)
+				else
+					self:_notify("JSON inválido (falta estructura mínima).", 3)
+				end
+			else
+				self:_notify("JSON inválido: no pudo decodificarse.", 3)
+			end
+		end)
+	end
+
+	-- tab switching logic
+	for _, child in ipairs(tabContainer:GetChildren()) do
+		if child:IsA("TextButton") then
+			child.MouseButton1Click:Connect(function()
+				for name,page in pairs(pages) do page.Visible = (name == child.Text) end
+			end)
+		end
+	end
+
+	-- save on GUI removed
+	screenGui:GetPropertyChangedSignal("Parent"):Connect(function()
+		if not screenGui.Parent then self:SaveSession() end
+	end)
+end
+
+-- Runtime pseudo-FPS update (visual demo)
+function Nexus:StartRuntime()
+	if self._runtimeBound then return end
+	self._runtimeBound = true
+	local lastTick = tick()
+	RunService.Heartbeat:Connect(function()
+		if not (self.settings and self.settings.LockFps and self.settings.LockFps.Enabled) then return end
+		local target = math.max(1, self.settings.LockFps.FPS or 60)
+		local dt = 1 / target
+		local now = tick()
+		if now - lastTick >= dt then
+			lastTick = now
+			if self._screenGui and self._screenGui:FindFirstChild("Main") then
+				local main = self._screenGui.Main
+				local tt = main:FindFirstChild("TitleTime")
+				if not tt then
+					tt = make("TextLabel", {Name = "TitleTime", Parent = main, Size = UDim2.new(0,180,0,20), Position = UDim2.new(0,8,0,34), BackgroundTransparency = 1, TextColor3 = Color3.fromRGB(245,245,245), Font = Enum.Font.Gotham, TextSize = 12, Text = os.date("%X")})
+				else
+					tt.Text = os.date("%X")
+				end
+			end
+		end
+	end)
+end
+
+function Nexus:GetSettings() return self.settings end
+function Nexus:SetSettings(tbl) if type(tbl)=="table" then self.settings = tbl; self:SaveSession() end end
+function Nexus:Notify(text,dur) self:_notify(text,dur) end
+
+return Nexus
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local module = require(game.StarterPlayer.StarterPlayerScripts:WaitForChild("NexusHubModule"))
+
+local hub = module.new(player)
+hub:BuildGui()
+hub:StartRuntime()
+hub:Notify("Nexus Hub EDU v2 cargado (modo local).", 3)
+
+-- Ejemplo: exponer en Player para debugging (opcional)
+pcall(function() player:SetAttribute("NexusHub_v2_loaded", true) end)
