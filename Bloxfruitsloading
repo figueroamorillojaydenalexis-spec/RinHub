@@ -3,7 +3,7 @@ local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 local gui = Instance.new("ScreenGui")
-gui.Name = "BloxFruitLoadingScreen"
+gui.Name = "BloxFruitLoading"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
 gui.Parent = player:WaitForChild("PlayerGui")
@@ -55,7 +55,7 @@ percent.BackgroundTransparency = 1
 percent.Font = Enum.Font.GothamBold
 percent.TextSize = 24
 percent.TextColor3 = Color3.fromRGB(255, 255, 255)
-percent.Text = "0%"
+percent.Text = "99%"
 percent.Parent = background
 
 -- Animación de carga (sube hasta 99%)
