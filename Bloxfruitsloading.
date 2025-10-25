@@ -1,0 +1,75 @@
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local gui = Instance.new("ScreenGui")
+gui.Name = "BloxFruitLoading"
+gui.ResetOnSpawn = true
+gui.IgnoreGuiInset = true
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- Fondo negro pantalla completa
+local background = Instance.new("Frame")
+background.Size = UDim2.new(1, 0, 1, 0)
+background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+background.BorderSizePixel = 0
+background.Parent = gui
+
+-- Texto central "bloxfruitloading"
+local loadingText = Instance.new("TextLabel")
+loadingText.Size = UDim2.new(1, 0, 0, 80)
+loadingText.Position = UDim2.new(0, 0, 0.4, 0)
+loadingText.BackgroundTransparency = 1
+loadingText.Text = "Message"
+loadingText.Font = Enum.Font.FredokaOne
+loadingText.TextSize = 42
+loadingText.TextColor3 = Color3.fromRGB(0, 162, 255)
+loadingText.Parent = background
+
+-- Barra de carga base
+local barBackground = Instance.new("Frame")
+barBackground.Size = UDim2.new(0.6, 0, 0, 20)
+barBackground.Position = UDim2.new(0.2, 0, 0.55, 0)
+barBackground.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+barBackground.BorderSizePixel = 0
+barBackground.Parent = background
+
+local barCorner = Instance.new("UICorner")
+barCorner.CornerRadius = UDim.new(0, 10)
+barCorner.Parent = barBackground
+
+-- Barra azul de progreso
+local barFill = Instance.new("Frame")
+barFill.Size = UDim2.new(0, 0, 1, 0)
+barFill.BackgroundColor3 = Color3.fromRGB(0, 162, 255)
+barFill.BorderSizePixel = 0
+barFill.Parent = barBackground
+local fillCorner = Instance.new("UICorner", barFill)
+fillCorner.CornerRadius = UDim.new(0, 10)
+
+-- Porcentaje
+local percent = Instance.new("TextLabel")
+percent.Size = UDim2.new(0, 100, 0, 40)
+percent.Position = UDim2.new(0.5, -50, 0.6, 0)
+percent.BackgroundTransparency = 1
+percent.Font = Enum.Font.GothamBold
+percent.TextSize = 24
+percent.TextColor3 = Color3.fromRGB(255, 255, 255)
+percent.Text = "99%"
+percent.Parent = background
+
+-- Animación de carga (sube hasta 99%)
+spawn(function()
+	for i = 1, 99 do
+		percent.Text = tostring(i) .. "%"
+		TweenService:Create(barFill, TweenInfo.new(0.05), {Size = UDim2.new(i/100, 0, 1, 0)}):Play()
+		wait(0.05)
+	end
+end)
+
+-- Efecto parpadeo suave en el texto
+while task.wait(1.2) do
+	TweenService:Create(loadingText, TweenInfo.new(0.5), {TextTransparency = 0.3}):Play()
+	wait(0.5)
+	TweenService:Create(loadingText, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
+end
