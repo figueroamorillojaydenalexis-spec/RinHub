@@ -1,0 +1,200 @@
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local SoundService = game:GetService("SoundService")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "NexusV5_2_Premium"
+gui.ResetOnSpawn = false
+
+local VALID_KEY = "NexusVip"
+
+----------------------------------------------------------
+-- Sonido premium
+----------------------------------------------------------
+local sound = Instance.new("Sound", SoundService)
+sound.SoundId = "rbxassetid://12221967" -- sonido suave de acceso
+sound.Volume = 1
+
+----------------------------------------------------------
+-- Ventana de Key
+----------------------------------------------------------
+local keyFrame = Instance.new("Frame", gui)
+keyFrame.Size = UDim2.new(0, 220, 0, 140)
+keyFrame.Position = UDim2.new(0.5, -110, 0.5, -70)
+keyFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Instance.new("UICorner", keyFrame).CornerRadius = UDim.new(0, 8)
+
+local keyTitle = Instance.new("TextLabel", keyFrame)
+keyTitle.Text = "Enter Key"
+keyTitle.Font = Enum.Font.GothamBold
+keyTitle.TextSize = 18
+keyTitle.TextColor3 = Color3.fromRGB(255,255,255)
+keyTitle.BackgroundTransparency = 1
+keyTitle.Position = UDim2.new(0, 0, 0, 8)
+keyTitle.Size = UDim2.new(1, 0, 0, 24)
+
+local box = Instance.new("TextBox", keyFrame)
+box.Size = UDim2.new(0.9, 0, 0, 28)
+box.Position = UDim2.new(0.05, 0, 0, 48)
+box.PlaceholderText = "Key: NexusVip"
+box.Font = Enum.Font.Gotham
+box.TextSize = 14
+box.Text = ""
+box.TextColor3 = Color3.fromRGB(255,255,255)
+box.BackgroundColor3 = Color3.fromRGB(45,45,45)
+Instance.new("UICorner", box).CornerRadius = UDim.new(0,6)
+
+local msg = Instance.new("TextLabel", keyFrame)
+msg.Size = UDim2.new(1, 0, 0, 20)
+msg.Position = UDim2.new(0, 0, 1, -28)
+msg.BackgroundTransparency = 1
+msg.Font = Enum.Font.Gotham
+msg.TextSize = 12
+msg.TextColor3 = Color3.fromRGB(255,80,80)
+msg.Text = ""
+
+local btn = Instance.new("TextButton", keyFrame)
+btn.Size = UDim2.new(0, 100, 0, 28)
+btn.Position = UDim2.new(0.5, -50, 1, -60)
+btn.Text = "Unlock"
+btn.Font = Enum.Font.GothamBold
+btn.TextSize = 14
+btn.TextColor3 = Color3.fromRGB(255,255,255)
+btn.BackgroundColor3 = Color3.fromRGB(0,160,80)
+Instance.new("UICorner", btn).CornerRadius = UDim.new(0,6)
+
+----------------------------------------------------------
+-- Panel principal (oculto al inicio)
+----------------------------------------------------------
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0, 200, 0, 180)
+main.Position = UDim2.new(0.5, -100, 0.5, -90)
+main.BackgroundColor3 = Color3.fromRGB(0,180,90)
+main.Visible = false
+main.Active = true
+Instance.new("UICorner", main).CornerRadius = UDim.new(0,8)
+
+local title = Instance.new("TextLabel", main)
+title.Text = "Nexus V5.2 Premium"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 15
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.BackgroundTransparency = 1
+title.Position = UDim2.new(0,10,0,6)
+title.Size = UDim2.new(1,-20,0,20)
+
+local close = Instance.new("TextButton", main)
+close.Size = UDim2.new(0,24,0,24)
+close.Position = UDim2.new(1,-30,0,6)
+close.Text = "✕"
+close.Font = Enum.Font.GothamBold
+close.TextSize = 14
+close.TextColor3 = Color3.fromRGB(255,255,255)
+close.BackgroundColor3 = Color3.fromRGB(180,50,50)
+Instance.new("UICorner", close).CornerRadius = UDim.new(0,6)
+close.MouseButton1Click:Connect(function() gui:Destroy() end)
+
+----------------------------------------------------------
+-- Crear toggles
+----------------------------------------------------------
+local function makeToggle(y, text)
+	local f = Instance.new("Frame", main)
+	f.Size = UDim2.new(1,-20,0,28)
+	f.Position = UDim2.new(0,10,0,y)
+	f.BackgroundTransparency = 1
+
+	local lbl = Instance.new("TextLabel", f)
+	lbl.Text = text
+	lbl.Font = Enum.Font.GothamSemibold
+	lbl.TextSize = 13
+	lbl.TextColor3 = Color3.fromRGB(255,255,255)
+	lbl.BackgroundTransparency = 1
+	lbl.Size = UDim2.new(0.6,0,1,0)
+	lbl.TextXAlignment = Enum.TextXAlignment.Left
+
+	local btn = Instance.new("TextButton", f)
+	btn.Size = UDim2.new(0,46,0,24)
+	btn.Position = UDim2.new(1,-56,0,2)
+	btn.Text = ""
+	btn.AutoButtonColor = false
+	btn.BackgroundColor3 = Color3.fromRGB(180,255,210)
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(1,0)
+
+	local knob = Instance.new("Frame", btn)
+	knob.Size = UDim2.new(0,18,0,18)
+	knob.Position = UDim2.new(0,3,0,3)
+	knob.BackgroundColor3 = Color3.fromRGB(255,255,255)
+	Instance.new("UICorner", knob).CornerRadius = UDim.new(1,0)
+
+	local on = false
+	btn.MouseButton1Click:Connect(function()
+		on = not on
+		if on then
+			TweenService:Create(btn,TweenInfo.new(0.2),{BackgroundColor3=Color3.fromRGB(0,255,150)}):Play()
+			TweenService:Create(knob,TweenInfo.new(0.2),{Position=UDim2.new(1,-21,0,3)}):Play()
+			sound:Play()
+		else
+			TweenService:Create(btn,TweenInfo.new(0.2),{BackgroundColor3=Color3.fromRGB(180,255,210)}):Play()
+			TweenService:Create(knob,TweenInfo.new(0.2),{Position=UDim2.new(0,3,0,3)}):Play()
+		end
+	end)
+end
+
+makeToggle(50,"Freeze Trade")
+makeToggle(85,"Auto Accept")
+makeToggle(120,"Auto Add Items")
+
+----------------------------------------------------------
+-- Panel movible
+----------------------------------------------------------
+local dragging = true
+local dragStart, startPos
+
+main.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = main.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local delta = input.Position - dragStart
+		main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+end)
+
+----------------------------------------------------------
+-- Key verification + animación
+----------------------------------------------------------
+btn.MouseButton1Click:Connect(function()
+	if box.Text == VALID_KEY then
+		msg.Text = "Access Granted!"
+		sound:Play()
+		-- animación fade
+		TweenService:Create(keyFrame, TweenInfo.new(0.6), {BackgroundTransparency = 1}):Play()
+		for _,v in pairs(keyFrame:GetDescendants()) do
+			if v:IsA("TextLabel") or v:IsA("TextButton") or v:IsA("TextBox") then
+				TweenService:Create(v, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
+			end
+		end
+		wait(0.6)
+		keyFrame:Destroy()
+		main.Visible = true
+		main.BackgroundTransparency = 1
+		TweenService:Create(main, TweenInfo.new(0.5), {BackgroundTransparency = 0}):Play()
+	else
+		msg.Text = "Invalid Key!"
+	end
+end)
+
+print("✅ Nexus V5.2 Premium cargado. Key: NexusVip")
