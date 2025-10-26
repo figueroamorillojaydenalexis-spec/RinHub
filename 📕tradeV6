@@ -125,7 +125,7 @@ local function createToggle(name)
 	-- toggle behavior: only allowed while simulated inTrade true
 	button.MouseButton1Click:Connect(function()
 		if not Sim.inTrade then
-			showWarning("name.")
+			showWarning("i need trade.")
 			return
 		end
 
@@ -143,7 +143,7 @@ local function createToggle(name)
 
 		-- update status text according to toggles
 		if Sim.inTrade then
-			statusLabel.Text = "i need in trade: " .. (Sim.partner ~= "" and Sim.partner or "Unknown")
+			statusLabel.Text = "not in trade: " .. (Sim.partner ~= "" and Sim.partner or "Unknown")
 		end
 	end)
 end
