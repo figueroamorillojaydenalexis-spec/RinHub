@@ -1,0 +1,295 @@
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- State (local, simulated)
+local Sim = {
+	inTrade = false,
+	partner = "",
+	toggles = {}
+}
+
+--== Main UI ==--
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "📕tradeV6.1"
+screenGui.Parent = playerGui
+screenGui.ResetOnSpawn = false
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 220, 0, 180)
+mainFrame.Position = UDim2.new(0.5, -140, 0.5, -110)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = screenGui
+
+local uiCorner = Instance.new("UICorner", mainFrame)
+uiCorner.CornerRadius = UDim.new(0, 12)
+
+local titleBar = Instance.new("TextLabel")
+titleBar.Size = UDim2.new(1, 0, 0, 30)
+titleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
+titleBar.Text = "📕 tradeV6.1"
+titleBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleBar.Font = Enum.Font.GothamBold
+titleBar.TextSize = 16
+titleBar.Parent = mainFrame
+Instance.new("UICorner", titleBar).CornerRadius = UDim.new(0, 12)
+
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(1, -20, 0, 25)
+statusLabel.Position = UDim2.new(0, 10, 0, 40)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Text = "Status - Not in trade"
+statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.TextSize = 14
+statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+statusLabel.Parent = mainFrame
+
+--== Warning label ==--
+local warningLabel = Instance.new("TextLabel")
+warningLabel.Size = UDim2.new(1, -20, 0, 25)
+warningLabel.Position = UDim2.new(0, 10, 1, -30)
+warningLabel.BackgroundTransparency = 1
+warningLabel.Text = ""
+warningLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
+warningLabel.Font = Enum.Font.GothamBold
+warningLabel.TextSize = 14
+warningLabel.Visible = false
+warningLabel.Parent = mainFrame
+
+local function showWarning(msg)
+	warningLabel.Text = msg
+	warningLabel.Visible = true
+	warningLabel.TextTransparency = 0
+	task.spawn(function()
+		task.wait(2)
+		TweenService:Create(warningLabel, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
+		task.wait(0.45)
+		warningLabel.Visible = false
+	end)
+end
+
+--== Toggles area ==--
+local toggleFrame = Instance.new("Frame")
+toggleFrame.Size = UDim2.new(1, -20, 1, -90)
+toggleFrame.Position = UDim2.new(0, 10, 0, 70)
+toggleFrame.BackgroundTransparency = 1
+toggleFrame.Parent = mainFrame
+
+local uiList = Instance.new("UIListLayout", toggleFrame)
+uiList.Padding = UDim.new(0, 8)
+uiList.SortOrder = Enum.SortOrder.LayoutOrder
+
+local toggles_def = {
+	"Freeze Trade",
+	"Auto Accept"
+}
+
+local function createToggle(name)
+	local holder = Instance.new("Frame")
+	holder.Size = UDim2.new(1, 0, 0, 28)
+	holder.BackgroundTransparency = 1
+	holder.Parent = toggleFrame
+
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(1, -70, 1, 0)
+	label.BackgroundTransparency = 1
+	label.Text = name .. ":"
+	label.TextColor3 = Color3.fromRGB(220, 220, 220)
+	label.Font = Enum.Font.Gotham
+	label.TextSize = 14
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Parent = holder
+
+	local button = Instance.new("TextButton")
+	button.Size = UDim2.new(0, 50, 1, -4)
+	button.Position = UDim2.new(1, -50, 0, 2)
+	button.BackgroundColor3 = Color3.fromRGB(70, 70, 90)
+	button.Text = "OFF"
+	button.TextColor3 = Color3.fromRGB(255, 100, 100)
+	button.Font = Enum.Font.GothamBold
+	button.TextSize = 12
+	button.Parent = holder
+	Instance.new("UICorner", button).CornerRadius = UDim.new(0, 8)
+
+	-- store state
+	Sim.toggles[name] = false
+
+	-- toggle behavior: only allowed while simulated inTrade true
+	button.MouseButton1Click:Connect(function()
+		if not Sim.inTrade then
+			showWarning("name.")
+			return
+		end
+
+		Sim.toggles[name] = not Sim.toggles[name]
+		local st = Sim.toggles[name]
+		if st then
+			button.Text = "ON"
+			button.TextColor3 = Color3.fromRGB(100, 255, 100)
+			button.BackgroundColor3 = Color3.fromRGB(90, 120, 90)
+		else
+			button.Text = "OFF"
+			button.TextColor3 = Color3.fromRGB(255, 100, 100)
+			button.BackgroundColor3 = Color3.fromRGB(70, 70, 90)
+		end
+
+		-- update status text according to toggles
+		if Sim.inTrade then
+			statusLabel.Text = "i need in trade: " .. (Sim.partner ~= "" and Sim.partner or "Unknown")
+		end
+	end)
+end
+
+for _,name in ipairs(toggles_def) do
+	createToggle(name)
+end
+
+--== Simulated Trade Controls (Start / End) ==--
+local ctlHolder = Instance.new("Frame")
+ctlHolder.Size = UDim2.new(1, -20, 0, 28)
+ctlHolder.Position = UDim2.new(0, 10, 0, 34)
+ctlHolder.BackgroundTransparency = 1
+ctlHolder.Parent = mainFrame
+
+local startBtn = Instance.new("TextButton")
+startBtn.Size = UDim2.new(0, 90, 1, 0)
+startBtn.Position = UDim2.new(0, 0, 0, 0)
+startBtn.BackgroundColor3 = Color3.fromRGB(40, 160, 40)
+startBtn.Font = Enum.Font.GothamBold
+startBtn.Text = "Start Trade"
+startBtn.TextColor3 = Color3.fromRGB(255,255,255)
+startBtn.TextSize = 14
+startBtn.Parent = ctlHolder
+Instance.new("UICorner", startBtn).CornerRadius = UDim.new(0,6)
+
+local endBtn = Instance.new("TextButton")
+endBtn.Size = UDim2.new(0, 90, 1, 0)
+endBtn.Position = UDim2.new(0, 100, 0, 0)
+endBtn.BackgroundColor3 = Color3.fromRGB(160, 40, 40)
+endBtn.Font = Enum.Font.GothamBold
+endBtn.Text = "End Trade"
+endBtn.TextColor3 = Color3.fromRGB(255,255,255)
+endBtn.TextSize = 14
+endBtn.Parent = ctlHolder
+Instance.new("UICorner", endBtn).CornerRadius = UDim.new(0,6)
+
+-- Modal to ask partner name (safe, local)
+local function openStartModal()
+	local modalOverlay = Instance.new("Frame")
+	modalOverlay.Size = UDim2.new(1,0,1,0)
+	modalOverlay.Position = UDim2.new(0,0,0,0)
+	modalOverlay.BackgroundColor3 = Color3.fromRGB(0,0,0)
+	modalOverlay.BackgroundTransparency = 0.45
+	modalOverlay.Parent = screenGui
+
+	local card = Instance.new("Frame")
+	card.Size = UDim2.new(0, 260, 0, 120)
+	card.Position = UDim2.new(0.5, -130, 0.5, -60)
+	card.BackgroundColor3 = Color3.fromRGB(30,30,38)
+	card.Parent = modalOverlay
+	Instance.new("UICorner", card).CornerRadius = UDim.new(0,10)
+
+	local label = Instance.new("TextLabel", card)
+	label.Size = UDim2.new(1, -20, 0, 30)
+	label.Position = UDim2.new(0, 10, 0, 10)
+	label.BackgroundTransparency = 1
+	label.Font = Enum.Font.Gotham
+	label.TextSize = 14
+	label.TextColor3 = Color3.fromRGB(230,230,230)
+	label.Text = "Enter partner name to simulate trade:"
+
+	local inputBox = Instance.new("TextBox", card)
+	inputBox.Size = UDim2.new(1, -20, 0, 28)
+	inputBox.Position = UDim2.new(0, 10, 0, 45)
+	inputBox.ClearTextOnFocus = false
+	inputBox.Text = ""
+	inputBox.Font = Enum.Font.Gotham
+	inputBox.TextSize = 14
+	inputBox.TextColor3 = Color3.fromRGB(230,230,230)
+	inputBox.BackgroundColor3 = Color3.fromRGB(20,20,28)
+	Instance.new("UICorner", inputBox).CornerRadius = UDim.new(0,6)
+
+	local accept = Instance.new("TextButton", card)
+	accept.Size = UDim2.new(0, 100, 0, 28)
+	accept.Position = UDim2.new(0.5, -110, 1, -38)
+	accept.Text = "Start"
+	accept.Font = Enum.Font.GothamBold
+	accept.TextColor3 = Color3.fromRGB(255,255,255)
+	accept.BackgroundColor3 = Color3.fromRGB(40,160,40)
+	Instance.new("UICorner", accept).CornerRadius = UDim.new(0,6)
+
+	local cancel = Instance.new("TextButton", card)
+	cancel.Size = UDim2.new(0, 100, 0, 28)
+	cancel.Position = UDim2.new(0.5, 10, 1, -38)
+	cancel.Text = "Cancel"
+	cancel.Font = Enum.Font.GothamBold
+	cancel.TextColor3 = Color3.fromRGB(255,255,255)
+	cancel.BackgroundColor3 = Color3.fromRGB(160,40,40)
+	Instance.new("UICorner", cancel).CornerRadius = UDim.new(0,6)
+
+	local function closeModal()
+		if modalOverlay and modalOverlay.Parent then
+			modalOverlay:Destroy()
+		end
+	end
+
+	accept.MouseButton1Click:Connect(function()
+		local name = tostring(inputBox.Text):gsub("\n",""):gsub("\r",""):gsub("%s+$","")
+		if name == "" then
+			showWarning("Please enter partner name")
+			return
+		end
+		Sim.inTrade = true
+		Sim.partner = name
+		-- reset all toggles to OFF
+		for k,_ in pairs(Sim.toggles) do Sim.toggles[k] = false end
+		closeModal()
+	end)
+
+	cancel.MouseButton1Click:Connect(closeModal)
+end
+
+startBtn.MouseButton1Click:Connect(openStartModal)
+
+endBtn.MouseButton1Click:Connect(function()
+	if not Sim.inTrade then
+		showWarning("No simulated trade is active")
+		return
+	end
+	Sim.inTrade = false
+	Sim.partner = ""
+	-- reset toggles
+	for k,_ in pairs(Sim.toggles) do Sim.toggles[k] = false end
+	-- visually reset buttons inside toggleFrame
+	for _,child in ipairs(toggleFrame:GetChildren()) do
+		if child:IsA("Frame") then
+			local btn = child:FindFirstChildOfClass("TextButton")
+			if btn then
+				btn.Text = "OFF"
+				btn.TextColor3 = Color3.fromRGB(255, 100, 100)
+				btn.BackgroundColor3 = Color3.fromRGB(70,70,90)
+			end
+		end
+	end
+end)
+
+--== Status updater ==--
+RunService.Heartbeat:Connect(function()
+	if Sim.inTrade then
+		statusLabel.Text = "not in trade: " .. (Sim.partner ~= "" and Sim.partner or "Unknown")
+		statusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+	else
+		statusLabel.Text = "Status - Not in trade"
+		statusLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+	end
+end)
+
+print("📕tradeV6.1 loaded (simulated).")
