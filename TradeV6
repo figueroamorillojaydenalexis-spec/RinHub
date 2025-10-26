@@ -1,0 +1,82 @@
+
+local player = game.Players.LocalPlayer
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "TradeV6_UI"
+gui.ResetOnSpawn = false
+
+-- Marco principal
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0, 260, 0, 150)
+main.Position = UDim2.new(0.37, 0, 0.35, 0)
+main.BackgroundColor3 = Color3.fromRGB(15, 25, 60)
+main.BorderSizePixel = 0
+main.Active = true
+main.Draggable = true  -- ✅ Este hace que sea movible directamente
+
+local corner = Instance.new("UICorner", main)
+corner.CornerRadius = UDim.new(0, 10)
+
+-- Título
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1, 0, 0, 30)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.Text = "⚡ Trade V6 ⚡"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 18
+
+-- Estado
+local status = Instance.new("TextLabel", main)
+status.Size = UDim2.new(1, -20, 0, 20)
+status.Position = UDim2.new(0, 10, 0, 35)
+status.BackgroundTransparency = 1
+status.Font = Enum.Font.Gotham
+status.Text = "Status: Not in trade"
+status.TextColor3 = Color3.fromRGB(200, 200, 200)
+status.TextSize = 14
+status.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Función de botón ON/OFF
+local function makeButton(name, yPos)
+	local buttonFrame = Instance.new("Frame", main)
+	buttonFrame.Size = UDim2.new(1, -20, 0, 30)
+	buttonFrame.Position = UDim2.new(0, 10, 0, yPos)
+	buttonFrame.BackgroundTransparency = 1
+
+	local label = Instance.new("TextLabel", buttonFrame)
+	label.Size = UDim2.new(0.6, 0, 1, 0)
+	label.BackgroundTransparency = 1
+	label.Font = Enum.Font.Gotham
+	label.Text = name .. ":"
+	label.TextColor3 = Color3.fromRGB(220, 220, 220)
+	label.TextSize = 15
+	label.TextXAlignment = Enum.TextXAlignment.Left
+
+	local btn = Instance.new("TextButton", buttonFrame)
+	btn.Size = UDim2.new(0.35, 0, 1, 0)
+	btn.Position = UDim2.new(0.65, 0, 0, 0)
+	btn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+	btn.Text = "OFF"
+	btn.Font = Enum.Font.GothamBold
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.TextSize = 14
+
+	local corner = Instance.new("UICorner", btn)
+	corner.CornerRadius = UDim.new(0, 5)
+
+	local state = false
+	btn.MouseButton1Click:Connect(function()
+		state = not in trade
+		if state then
+			btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+			btn.Text = "ON"
+		else
+			btn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+			btn.Text = "OFF"
+		end
+	end)
+end
+
+-- Botones
+makeButton("Freeze Trade", 70)
+makeButton("Auto Accept", 105)
